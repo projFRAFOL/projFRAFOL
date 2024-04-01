@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Using Project {{ all_data[0] }} with {{ all_data[1]}} {% endblock %}</h1>
+    <div class="main_wrapper">
+        <div id="project_menu" class="split left">
+            <div id="details">
+                <form action="/coverage" method="post">
+                    <button name="coverage" value="{{ all_data[0] }}"" >COVERAGE</button>
+                </form>
+            </div>
+            <br>
+            <div id="mutation_options">
+                <form action="/generate" method="post">
+                    <input type="checkbox" value="extend" name="mycheckbox" id="option1">
+                    <label for="option1"> Include extended test cases.</label><br>
+                    <input type="checkbox" value="exclude" name="mycheckbox" id="option2">
+                    <label for="option2"> Exclude developer test cases.</label><br>
+                    <input type="submit" value="GENERATE">
+                </form> 
+            </div>
+            <br><br>
+            <div>
+                <form action="/analyze" method="post">
+                    <button name="analyze" value="{{ all_data[0] }}"" >ANALYZE</button>
+                </form><br>
+                <form action="/summary" method="post">
+                    <button name="summary" value="{{ all_data[0] }}"" >SUMMARY</button>
+                </form>
+            </div>    
+            <table>
+                <tr>
+                    {% for header in table_header %}
+                    <th> {{ header }}</th>
+                    {% endfor %}
+                </tr>
+                {% for row in sheet_data %}
+                <tr>
+                    {% for cell in row %}
+                    <td> {{ cell }} </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table> 
+        </div>
+        <div class="container my-5">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-code-tab" data-toggle="tab"
+                    data-target="#nav-code" type="button" role="tab" aria-controls="nav-code"
+                    aria-selected="true">Test Suite</button>
+                    <button class="nav-link" id="nav-dev-tab" data-toggle="tab"
+                    data-target="#nav-dev" type="button" role="tab" aria-controls="nav-dev"
+                    aria-selected="false">Dev Tests</button>
+                    <button class="nav-link" id="nav-class-tab" data-toggle="tab"
+                    data-target="#nav-class" type="button" role="tab" aria-controls="nav-class"
+                    aria-selected="false">Class under test</button>
+                </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active p-3" id="nav-code" role="tabpanel" aria-labelledby="nav-code-tab"> 
+                    <form action="/save_testsuite" method="post">
+                        <textarea name="junit_editor" id="editor"></textarea>
+                        <button type="submit">SAVE</button>
+                    </form>
+                </div>
+                <div class="tab-pane fade p-3" id="nav-dev" role="tabpanel" aria-labelledby="nav-dev-tab">
+                    <textarea name="dev_suite" id="dev_suite"></textarea>
+                </div>
+                <div class="tab-pane fade p-3" id="nav-class" role="tabpanel" aria-labelledby="nav-class-tab">
+                    <textarea name="test_class" id="test_class"></textarea>
+                </div>
+                <button onclick="compile()">Compile</button>
+                <div id="output"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Welcome to Defects4j {% endblock %}</h1>
+    <div class="menu">
+        <div class="sub_menu" id="checkout_project">
+            <h5>Import Project to Test:</h5>
+            <form action="/checkout_project" method="POST">
+                <div class="menu_block">
+                    <div class="menu_item"> 
+                        <label for="select_menu_one">Project</label><br>
+                        <select name="select_project" id="select_menu_one">
+                        {% for item in all_data[0] %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div class="menu_item">
+                        <label for="version">Version</label><br>
+                        <input type="number" id="version" name="version">
+                    </div>
+                </div>
+                <input type="submit" value="Import">
+            </form>
+        </div>
+        <div class="sub_menu" id="load_project">
+            <h5>Open Project:</h5>
+            <form action="/load_project" method="POST">
+                <div class="menu_block">
+                    <div class="menu_item">
+                        <label for="select_menu_two">Project</label><br>
+                        <select name="project" id="select_menu_two">
+                        {% for item in all_data[1] %}
+                        <option value="{{ item }}">{{ item }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div class="menu_item">
+                        <label for="tool">Mutation Tool</label><br>
+                        <select name="select_tool" id="tool">
+                            <option value="pit">PIT</option>
+                            <option value="major">MAJOR</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="submit" value="Open">
+            </form>
+        </div>
+    </div>  
+{% endblock %}
+

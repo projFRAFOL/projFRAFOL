@@ -1,0 +1,65 @@
+html, body {
+    height: 100%;
+    width: 100%;
+  }
+
+h1 {
+    border: 2px #eee solid;
+    color: brown;
+    text-align: center;
+    padding: 10px;
+}
+
+.main-container {
+    width: 100%;
+    overflow: hidden;
+    margin-left: 0 auto;
+    margin-right: 0 auto;
+    padding: 0 0 0 0;
+  }
+
+.main_wrapper {
+   display: flex;
+   justify-content: space-around;
+}
+
+.split {
+    align-content: center;
+    flex-basis: 50%;
+}
+
+.menu {
+  margin: auto;
+  height: 700px;
+  width: 33%;
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.sub_menu {
+  margin: auto;
+  align-content: center;
+  padding: 10px;
+}
+
+.menu_block {
+  justify-content: left;
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.menu_item {
+  margin-right: 0.5rem;
+}
+
+#select_menu_one {
+  width: 150px;   
+}
+
+#select_menu_two {
+  width: 150px;   
+}
+
+#version {
+  width: 50px;
+}
