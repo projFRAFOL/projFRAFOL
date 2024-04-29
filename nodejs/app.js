@@ -12,10 +12,34 @@ var corsOptions = {
 
 app.use(express.json(), cors(corsOptions));
 
+app.post('/checkout', (req, res) => {
+  const project = req.body.project;
+  const version = req.body.version;
+
+  let cmd = ("defects4j checkout -p " + project + " -v" + version + "f -w $HOME/"
+                   + project + "-" + version + "f")
+
+  exec(cmd, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      res.status(500).json({ error: error.message });
+      return;
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      res.status(400).json({ error: stderr });
+      return;
+    }
+    console.log(`stdout: ${stdout}`);
+    res.json({ message: 'Checkout successful' });
+  });
+});
+
 app.post('/compile', (req, res) => {
   const javaCode = req.body.code;
-
-  const filePath = 'StudentTest.java';
+  const path = req.body.path;
+  const filePath = path + 'StudentTest.java';
+  console.log('FILEPATH: ' + filePath)
 
   // Write Java code to the file
   fs.writeFile(filePath, javaCode, (err) => {
@@ -27,7 +51,7 @@ app.post('/compile', (req, res) => {
   });
 
   // Execute Java compiler
-  exec(`javac StudentTest.java`, (error, stdout, stderr) => {
+  exec(`javac ` + filePath, (error, stdout, stderr) => {
     if (error) {
       console.error(`Compilation error: ${error.message}`);
       console.log()

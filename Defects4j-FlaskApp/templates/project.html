@@ -1,47 +1,103 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Using Project {{ all_data[0] }} with {{ all_data[1]}} {% endblock %}</h1>
     <div class="main_wrapper">
-        <div id="project_menu" class="split left">
+        <div class="container my-5">
             <div id="details">
-                <form action="/coverage" method="post">
-                    <button name="coverage" value="{{ all_data[0] }}"" >COVERAGE</button>
-                </form>
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <h5 class="mb-1" id="project_id" value="{{ all_data[0] }}">Working Project: {{ all_data[0] }}</h5>
+                    </div>
+                    <div class="col-3 pl-0">
+                        <h5 class="mb-1" id="tool_id" value="{{ all_data[1] }}">Mutation Tool: {{ all_data[1] }}</h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
+                        <div class="card shadow-sm card-hover-shadow h-100">
+                            <div class="card-body">
+                                <h6 class="card-subtitle">Code Coverage:</h6>
+                                <div class="row align-items-center gx-2 mb-1">
+                                    <div class="col-7">
+                                        <h2 class="card-title text-inherit">{{ metric_data[4] }}%</h2>
+                                    </div>
+                                </div>
+                                <span class="text-body fs-6 ms-1">{{ metric_data[1] }}/{{ metric_data[0] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
+                        <div class="card shadow-sm card-hover-shadow h-100">
+                            <div class="card-body">
+                                <h6 class="card-subtitle">Condition Coverage:</h6>
+                                <div class="row align-items-center gx-2 mb-1">
+                                    <div class="col-7">
+                                        <h2 class="card-title text-inherit">{{ metric_data[5] }}%</h2>
+                                    </div>
+                                </div>
+                                <span class="text-body fs-6 ms-1">{{ metric_data[3] }}/{{ metric_data[2] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
+                        <div class="card shadow-sm card-hover-shadow h-100">
+                            <div class="card-body">
+                                <h6 class="card-subtitle">Mutation Score:</h6>
+                                <div class="row align-items-center gx-2 mb-1">
+                                    <div class="col-7">
+                                        <h2 class="card-title text-inherit">{{ summary_data[3] }}%</h2>
+                                    </div>
+                                </div>
+                                <span class="text-body fs-6 ms-1">{{ summary_data[1] }}/{{ summary_data[0] }}</span>
+                                <span class="text-body fs-6 ms-1">live: {{ summary_data[2] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <br>
-            <div id="mutation_options">
-                <form action="/generate" method="post">
-                    <input type="checkbox" value="extend" name="mycheckbox" id="option1">
-                    <label for="option1"> Include extended test cases.</label><br>
-                    <input type="checkbox" value="exclude" name="mycheckbox" id="option2">
-                    <label for="option2"> Exclude developer test cases.</label><br>
-                    <input type="submit" value="GENERATE">
-                </form> 
+            <div class="row" id="mutation_options">
+                <div class="col ml-3">
+                    <form id="generateForm" action="javascript:generate()">
+                        <input type="checkbox" value="extend" name="mycheckbox" id="option1">
+                        <label for="option1"> Include extended test cases.</label><br>
+                        <input type="checkbox" value="exclude" name="mycheckbox" id="option2">
+                        <label for="option2"> Exclude developer test cases.</label><br>
+                        <div class="input-group">
+                            <input type="submit" class="btn btn-secondary" id="generateBtn" value="GENERATE">
+                            <div class="input-group-append">
+                              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                    </form> 
+                </div>
             </div>
-            <br><br>
-            <div>
-                <form action="/analyze" method="post">
-                    <button name="analyze" value="{{ all_data[0] }}"" >ANALYZE</button>
-                </form><br>
-                <form action="/summary" method="post">
-                    <button name="summary" value="{{ all_data[0] }}"" >SUMMARY</button>
-                </form>
+            <div class="container pt-5"> 
+                <table id="livemutants" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            {% for header in table_header %}
+                            <th> {{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in sheet_data %}
+                        <tr>
+                            {% for cell in row %}
+                            <td> {{ cell }} </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            {% for header in table_header %}
+                            <th> {{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                    </tfoot>
+                </table>
             </div>    
-            <table>
-                <tr>
-                    {% for header in table_header %}
-                    <th> {{ header }}</th>
-                    {% endfor %}
-                </tr>
-                {% for row in sheet_data %}
-                <tr>
-                    {% for cell in row %}
-                    <td> {{ cell }} </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </table> 
         </div>
         <div class="container my-5">
             <nav>
@@ -58,20 +114,19 @@
                 </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade show active p-3" id="nav-code" role="tabpanel" aria-labelledby="nav-code-tab"> 
-                    <form action="/save_testsuite" method="post">
-                        <textarea name="junit_editor" id="editor"></textarea>
-                        <button type="submit">SAVE</button>
-                    </form>
+                <div class="tab-pane fade show active pt-3 pr-3 pl-3" id="nav-code" role="tabpanel" aria-labelledby="nav-code-tab"> 
+                    <textarea name="junit_editor" id="editor"></textarea>
                 </div>
-                <div class="tab-pane fade p-3" id="nav-dev" role="tabpanel" aria-labelledby="nav-dev-tab">
+                <div class="tab-pane fade pt-3 pr-3 pl-3" id="nav-dev" role="tabpanel" aria-labelledby="nav-dev-tab">
                     <textarea name="dev_suite" id="dev_suite"></textarea>
                 </div>
-                <div class="tab-pane fade p-3" id="nav-class" role="tabpanel" aria-labelledby="nav-class-tab">
+                <div class="tab-pane fade pt-3 pr-3 pl-3" id="nav-class" role="tabpanel" aria-labelledby="nav-class-tab">
                     <textarea name="test_class" id="test_class"></textarea>
                 </div>
-                <button onclick="compile()">Compile</button>
-                <div id="output"></div>
+                <div class="output pt-1 pr-3 pl-3 pb-3">
+                    <textarea name="console" id="console"></textarea>
+                    <button onclick="compile()">Compile</button>
+                </div>
             </div>
         </div>
     </div>

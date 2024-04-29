@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, Response, session, jsonify
+from flask import Flask, render_template, request, Response, session, jsonify, url_for
 from flask_cors import CORS
 import os
+import subprocess
 import json
 import pathlib
 import io
@@ -175,6 +176,60 @@ def file_data(path):
 
     return data
 
+def coverage():
+    cmd = ("defects4j coverage -w $HOME/" + session["project"] + "f")
+    output = subprocess.check_output(cmd, shell=True, text=True)
+
+    pattern = r'\d+(?:\.\d+)?'
+
+    matches = re.findall(pattern, output)
+
+    return matches
+
+def summary():
+    path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/reportsanalyzer.py'
+    filename = ""
+
+    if session["tool"] == "pit":
+        dir_path = dir_path = "/root/" + session["project"] + "f/tools_output/pit/"
+        filetype = "*.xml"
+        for file_path in os.listdir(dir_path):
+            if file_path.endswith(filetype[1:]):
+                filename = "/" + file_path
+
+    cmd = ("python3 " + path + " summary -p " + session["project_name"]
+                   + " -b " + session["project_version"] + " -t " + session["tool"] + " $HOME/" + session["project"] + "f/tools_output/" + session["tool"] + filename)
+    
+    output = subprocess.check_output(cmd, shell=True, text=True)
+
+    pattern = r'\d+(?:\.\d+)?'
+
+    data = re.findall(pattern, output)
+
+    print("MATCHES: \n")
+    print(data)
+
+    matches = [data[13], data[14], data[15], (round(float(data[16]),4))*100]
+
+    return matches
+
+def save_testsuite(data):
+    
+    path = "static/projectdata/StudentTest.java"
+    
+    file = open(path, "w")
+    file.write(data)
+    file.close()
+
+    # java_json = json.dumps({'code': data})
+
+    # nodejs_response = requests.post('http://localhost:3000/compile', json= java_json)
+
+    # if nodejs_response.status_code == 200:
+    #     return jsonify({'message': nodejs_response.text})
+    # else:
+    #     return jsonify({'error': 'Failed to communicate with Node.js server'})
+
 @app.route('/', methods=['POST', 'GET'])
 def index():
     session["ids"] = get_projects_id()
@@ -184,8 +239,12 @@ def index():
 
 @app.route('/checkout_project', methods=['post'])
 def checkout_project():
-    project = request.form["select_project"]
-    version = request.form["version"]
+    data = request.json
+
+    project = data['project']
+    version = data['version']
+
+    print("project: " + project + "\n")
 
     session["projects"].append(project + '-' + version)
     session["project_name"] = project
@@ -211,13 +270,13 @@ def checkout_project():
                       indent=4,
                       separators=(',', ': '))
 
-    return render_template('index.html', all_data = [session["ids"], session["projects"]])
+    return jsonify({'message': 'Project checkout successfully'}), 205
 
 @app.route('/load_project', methods=['post'])
 def load_project():
     session["project"] = request.form["project"]
     session["tool"] = request.form["select_tool"]
-    session.modified = True
+    session["summary_data"] = ['0','0','0','0']
     sheet_data = list()
 
     path = get_class_path(session["project"])
@@ -242,27 +301,23 @@ def load_project():
             case _:
                 print("No tool selection was found.")
 
+    session["metric_data"] = coverage()
+    session.modified = True
+
     return render_template('project.html', all_data = [session["project"], session["tool"]],
-                            table_header = table_header, sheet_data = sheet_data)
-
-@app.route('/coverage', methods=['post'])
-def coverage():
-
-    cmd = ("defects4j coverage -w $HOME/" + session["project"] + "f")
-    os.system(cmd)
-
-    return Response(status=204)
+                            table_header = table_header, sheet_data = sheet_data,
+                            metric_data = session["metric_data"], summary_data = session["summary_data"])
 
 @app.route('/generate', methods=['post'])
 def generate():
+    data = request.json
+
+    save_testsuite(data['code'])
+
     extended = ""
 
-    for item in request.form.getlist("mycheckbox"):
-        if item == "extend":
-            extended = " -t /root/StudentTest.java"
-            print("here")
-        elif item == "exclude":
-            print("here")
+    if data['extended']:
+        extended = " -t static/projectdata/StudentTest.java"
     
     #developer = request.form["option2"]
 
@@ -272,7 +327,12 @@ def generate():
     cmd = ("python3 " + path + " run $HOME/" + session["project"] + "f --all-dev" + extended + " --tools " + session["tool"])
     os.system(cmd)
 
-    return Response(status=204)
+    return jsonify({'message': 'Mutants generated successfully'}), 205
+
+@app.route('/working_project', methods=['get'])
+def working_project():
+
+    return jsonify({'project': session["project"]})
 
 @app.route('/analyze', methods=['post'])
 def analyze():
@@ -313,49 +373,14 @@ def analyze():
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
             case _:
                 print("No tool selection was found.")
-
+        
+    session["summary_data"] = summary()
+    session.modified = True
 
     return render_template('project.html', all_data = [session["project"], session["tool"]],
-                            table_header = table_header, sheet_data = sheet_data)
+                            table_header = table_header, sheet_data = sheet_data,
+                            metric_data = session["metric_data"], summary_data = session["summary_data"])
 
-@app.route('/summary', methods=['post'])
-def summary():
-    path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/reportsanalyzer.py'
-    filename = ""
-
-    if session["tool"] == "pit":
-        dir_path = dir_path = "/root/" + session["project"] + "f/tools_output/pit/"
-        filetype = "*.xml"
-        for file_path in os.listdir(dir_path):
-            if file_path.endswith(filetype[1:]):
-                filename = "/" + file_path
-
-    command = ("python3 " + path + " summary -p " + session["project_name"]
-                   + " -b " + session["project_version"] + " -t " + session["tool"] + " $HOME/" + session["project"] + "f/tools_output/" + session["tool"] + filename)
-    os.system(command)
-
-    return Response(status=204)
-
-@app.route('/save_testsuite', methods=['post'])
-def save_testsuite():
-    
-    data = request.form["junit_editor"]
-    path = "/root/StudentTest.java"
-    
-    file = open(path, "w")
-    file.write(data)
-    file.close()
-
-    # java_json = json.dumps({'code': data})
-
-    # nodejs_response = requests.post('http://localhost:3000/compile', json= java_json)
-
-    # if nodejs_response.status_code == 200:
-    #     return jsonify({'message': nodejs_response.text})
-    # else:
-    #     return jsonify({'error': 'Failed to communicate with Node.js server'})
-
-    return Response(status=204)
 
 if (__name__ == '__main__'):
     app.run(host='0.0.0.0', port=int('8000'), debug=True)

@@ -5,7 +5,7 @@
     <div class="menu">
         <div class="sub_menu" id="checkout_project">
             <h5>Import Project to Test:</h5>
-            <form action="/checkout_project" method="POST">
+            <form id="importForm" action="javascript:checkout()">
                 <div class="menu_block">
                     <div class="menu_item"> 
                         <label for="select_menu_one">Project</label><br>
@@ -20,12 +20,17 @@
                         <input type="number" id="version" name="version">
                     </div>
                 </div>
-                <input type="submit" value="Import">
+                <div class="input-group">
+                    <input type="submit" class="btn btn-secondary" id="importBtn" value="Import">
+                    <div class="input-group-append">
+                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </div>
+                </div>
             </form>
         </div>
         <div class="sub_menu" id="load_project">
             <h5>Open Project:</h5>
-            <form action="/load_project" method="POST">
+            <form id="loadForm" action="/load_project" method="POST">
                 <div class="menu_block">
                     <div class="menu_item">
                         <label for="select_menu_two">Project</label><br>
@@ -43,7 +48,12 @@
                         </select>
                     </div>
                 </div>
-                <input type="submit" value="Open">
+                <div class="input-group">
+                    <input type="submit" class="btn btn-secondary" id="openBtn" value="Open">
+                    <div class="input-group-append">
+                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </div>
+                </div>
             </form>
         </div>
     </div>  
