@@ -135,10 +135,10 @@ This tab lists all the pre-written tests for the class. Users can review the exi
 
 This page includes a table detailing information about each live mutant present in the code, after executing the mutation tool. This includes:
 
-    - **Mutant Id**: An identifier for the specific mutant.
-    - **Line**: Which line of code the mutant is altering.
-    - **Operator**: Which type of mutant operator is being applied.
-    - **Method**: Which class method is being affected by the mutant.
+- **Mutant Id**: An identifier for the specific mutant.
+- **Line**: Which line of code the mutant is altering.
+- **Operator**: Which type of mutant operator is being applied.
+- **Method**: Which class method is being affected by the mutant.
 
 ## Contributing
 Guidelines for contributing to the project.
