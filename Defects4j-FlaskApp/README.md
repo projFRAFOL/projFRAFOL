@@ -4,7 +4,9 @@
 FRAFOL is an educational framework designed to introduce and teach the concepts and practices of mutation testing. It provides a comprehensive environment where learners can experiment with different mutation testing tools. The framework includes a curated collection of buggy projects provided by Defects4j, offering hands-on experience in identifying and resolving code defects.
 
 ## Installation
-In order to use FRAFOL it is required to install Docker in your system. The following guidelines are instructions in the installation of Docker on both Windows and Linux machines.
+Clone the project using the following command: `git clone https://github.com/PedroTav/Defects4jFlaskApp.git`
+
+In order to use FRAFOL it is required to install Docker in your system. The following guidelines are instructions in the installation of Docker on both Windows, macOS and Linux machines.
 
 ### For Windows
 
@@ -15,7 +17,7 @@ In order to use FRAFOL it is required to install Docker in your system. The foll
 
 2. Download Docker Desktop 
 
-    - Visit the Docker Desktop for Windows download page and download the installer.
+    - Visit the [Docker Desktop for Windows download page](https://docs.docker.com/desktop/install/windows-install/) and download the installer.
 
 3. Install Docker Desktop 
 
@@ -35,20 +37,44 @@ In order to use FRAFOL it is required to install Docker in your system. The foll
     `docker --version`
     - You should see the Docker version installed.
 
+### For macOS
+
+1. Download Docker Desktop for Mac:
+
+Visit the Docker website: [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
+Click on "Download for Mac" to get the Docker Desktop installer.
+
+2. Install Docker Desktop:
+
+Open the downloaded `.dmg` file.
+Drag the Docker icon to the Applications folder.
+
+3. Launch Docker Desktop:
+
+Open Docker from the Applications folder.
+Follow the on-screen instructions to complete the setup.
+
+4. Verify Installation:
+
+Open a terminal window.
+Run the command `docker --version` to ensure Docker is installed and running.
+
 ### For Linux (Ubuntu as an example)
 
 1. Update Package Information
 
-`sudo apt-get update`
+```
+sudo apt-get update
+```
 
 2. Install Prerequisites
 
 ```
-  sudo apt-get install \
-  ca-certificates \
-  curl \
-  gnupg \
-  lsb-release
+sudo apt-get install \
+ca-certificates \
+curl \
+gnupg \
+lsb-release
 ```
 
 3. Add Docker’s Official GPG Key
@@ -87,10 +113,10 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
     `docker --version`
     - You should see the Docker version installed.
 
-## Usage
-Once Docker has been installed, navigate to the framework directory and run the commmand:
+Once Docker has been installed and running, navigate to the project directory and run the commmand:
 `docker compose up -d`
 
+## Usage
 Open a browser page, using the url http://localhost:8000/.
 
 ![FRAFOL Landing Page](./assets/images/landing.jpg "Landing Page")
