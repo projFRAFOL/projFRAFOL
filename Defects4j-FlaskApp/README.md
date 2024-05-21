@@ -88,7 +88,57 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
     - You should see the Docker version installed.
 
 ## Usage
-How to use the project once it’s installed.
+Once Docker has been installed, navigate to the framework directory and run the commmand:
+`docker compose up -d`
+
+Open a browser page, using the url http://localhost:8000/.
+
+![FRAFOL Landing Page](/assets/images/landing.png "Landing Page")
+
+From here, select a project from the dropdown menu, indicating the buggy version for the specific project. Clicking import will add the selection to the list of projects that are currently being tested.
+
+Select a project from the list of imported projects and the mutation tool to be applied. Click open to initiate the chosen project and begin writing test cases.
+
+![Project Working Page](/assets/images/working.png "Project Page")
+
+The following page includes an editor for writing test cases and a dashboard of information regarding mutation testing.
+
+### Navigation Tabs
+1. Mutation Data
+2. Class under mutation
+3. Student Tests
+4. Dev Tests
+
+### Tab1: Mutation Data
+
+This tab provides detailed statistics on code coverage, condition coverage, and mutation score for the class.
+
+- **Code Coverage**: Software testing metric that measures the percentage of source code that is executed when a particular set of tests is run. It helps in identifying untested parts of a codebase, ensuring that as much of the code as possible is tested, thereby improving software quality and reliability. Higher code coverage indicates that more lines of code have been tested, which typically leads to fewer undetected bugs.
+- **Condition Coverage**: Software testing metric that evaluates whether each boolean sub-expression (condition) in a program has been tested for both true and false outcomes. This ensures that all logical paths are evaluated, helping to identify errors in the decision-making logic of the code.
+- **Mutation Score**: Software testing metric that measures the effectiveness of a test suite by introducing small changes (mutations) to the program's code and checking if the tests detect the errors. It is the ratio of mutants killed against mutants that remain alive.
+
+Clicking the **Run** button will execute the mutation tool and run the selected test suites against the alterated code. 
+
+### Tab2: Class under mutation
+
+This tab includes the code regarding the class that is being mutated by the tool.
+
+### Tab3: Student Tests
+
+This tab allows users to write and run their own test cases for the class. Users can input test code, run it, and see the results directly on the page.
+
+### Tab4: Dev Tests
+
+This tab lists all the pre-written tests for the class. Users can review the existing tests to see how the class methods are being tested.
+
+### Live Mutant Data
+
+This page includes a table detailing information about each live mutant present in the code, after executing the mutation tool. This includes:
+
+    - **Mutant Id**: An identifier for the specific mutant.
+    - **Line**: Which line of code the mutant is altering.
+    - **Operator**: Which type of mutant operator is being applied.
+    - **Method**: Which class method is being affected by the mutant.
 
 ## Contributing
 Guidelines for contributing to the project.
