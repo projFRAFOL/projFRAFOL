@@ -24,6 +24,11 @@ def get_projects_id():
 
     return project_list
 
+def get_project_versions(project):
+    path = os.path.split(os.getcwd())[0] + 'defects4j/framework/projects/' + project + '/active-bugs.csv'
+    df = pd.read_csv(path)
+    return df['bug.id'].tolist()
+
 def get_projects_fromjson():
     path = pathlib.Path().resolve() / "data.json"
     project_list = list()
@@ -202,16 +207,18 @@ def summary():
     
     output = subprocess.check_output(cmd, shell=True, text=True)
 
-    pattern = r'\d+(?:\.\d+)?'
+    # Define pattern to match key-value pairs
+    pattern = r'([^:]+):\s+(.*)'
 
-    data = re.findall(pattern, output)
+    # Find all matches
+    matches = re.findall(pattern, output)
 
-    print("MATCHES: \n")
-    print(data)
+    # Convert matches to a dictionary
+    data = {key.strip(): value.strip() for key, value in matches}
 
-    matches = [data[13], data[14], data[15], (round(float(data[16]),4))*100]
+    values = [data["Total mutants count"], data["Killed mutants count"], data["Live mutants count"], (round(float(data["Mutation score"]),4))*100]
 
-    return matches
+    return values
 
 def save_testsuite(data):
     
@@ -220,15 +227,6 @@ def save_testsuite(data):
     file = open(path, "w")
     file.write(data)
     file.close()
-
-    # java_json = json.dumps({'code': data})
-
-    # nodejs_response = requests.post('http://localhost:3000/compile', json= java_json)
-
-    # if nodejs_response.status_code == 200:
-    #     return jsonify({'message': nodejs_response.text})
-    # else:
-    #     return jsonify({'error': 'Failed to communicate with Node.js server'})
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -277,6 +275,7 @@ def load_project():
     session["project"] = request.form["project"]
     session["tool"] = request.form["select_tool"]
     session["summary_data"] = ['0','0','0','0']
+    session.modified = True
     sheet_data = list()
 
     path = get_class_path(session["project"])
@@ -314,17 +313,17 @@ def generate():
 
     save_testsuite(data['code'])
 
-    extended = ""
+    student_tests = ""
+    dev_tests = ""
 
-    if data['extended']:
-        extended = " -t static/projectdata/StudentTest.java"
-    
-    #developer = request.form["option2"]
+    if data['studentTests']:
+        student_tests = " -t static/projectdata/StudentTest.java"
 
-    ##TO-DO Include and Exclude Extended and Dev test cases.
+    if data['devTests']:
+        dev_tests = " --all-dev"
 
     path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/analyzer.py'
-    cmd = ("python3 " + path + " run $HOME/" + session["project"] + "f --all-dev" + extended + " --tools " + session["tool"])
+    cmd = ("python3 " + path + " run $HOME/" + session["project"] + "f"+ dev_tests + student_tests + " --tools " + session["tool"])
     os.system(cmd)
 
     return jsonify({'message': 'Mutants generated successfully'}), 205
@@ -332,7 +331,21 @@ def generate():
 @app.route('/working_project', methods=['get'])
 def working_project():
 
-    return jsonify({'project': session["project"]})
+    cmd = ("defects4j export -p cp.test -w $HOME/" + session["project"] + "f")
+    output = subprocess.check_output(cmd, shell=True, text=True)
+
+    return jsonify({'project': session["project"], 'cppath': output})
+
+@app.route('/project_versions', methods=['post'])
+def project_versions():
+    data = request.json
+
+    versions = get_project_versions(data['project'])
+
+    print("VERSIONS: \n")
+    print(versions)
+
+    return jsonify({'versions': versions}), 200
 
 @app.route('/analyze', methods=['post'])
 def analyze():

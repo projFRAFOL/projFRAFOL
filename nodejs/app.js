@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 const { exec } = require('child_process');
 
 const app = express();
@@ -37,21 +38,28 @@ app.post('/checkout', (req, res) => {
 
 app.post('/compile', (req, res) => {
   const javaCode = req.body.code;
-  const path = req.body.path;
-  const filePath = path + 'StudentTest.java';
+  const cppath = req.body.cppath;
+  const project = req.body.project;
+  const filePath = `/root/${project}/${req.body.stPath}/StudentTest.java`;
   console.log('FILEPATH: ' + filePath)
 
   // Write Java code to the file
   fs.writeFile(filePath, javaCode, (err) => {
-      if (err) {
-          console.error('Error writing Java file:', err);
-          return;
-      }
-      console.log('Java file created successfully!');
+    if (err) {
+        console.error('Error writing Java file:', err);
+        return;
+    }
+    console.log('Java file created successfully!');
   });
 
+  const env = {
+    ...process.env, // include existing environment variables
+    'test.classes.dir': req.body.stPath,
+    'classes.dir': req.body.clPath
+  };
+
   // Execute Java compiler
-  exec(`javac ` + filePath, (error, stdout, stderr) => {
+  exec(`javac -cp "${cppath}" ${filePath}`, { env }, (error, stdout, stderr) => {
     if (error) {
       console.error(`Compilation error: ${error.message}`);
       console.log()
@@ -66,6 +74,7 @@ app.post('/compile', (req, res) => {
     console.log(`Compilation successful: ${stdout}`);
     res.json({ message: 'Compilation successful' });
   });
+  
 });
 
 app.listen(port, () => {

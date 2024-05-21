@@ -2,73 +2,90 @@
 
 {% block content %}
     <div class="main_wrapper">
-        <div class="container my-5">
-            <div id="details">
-                <div class="row mb-3">
-                    <div class="col-4">
-                        <h5 class="mb-1" id="project_id" value="{{ all_data[0] }}">Working Project: {{ all_data[0] }}</h5>
-                    </div>
-                    <div class="col-3 pl-0">
-                        <h5 class="mb-1" id="tool_id" value="{{ all_data[1] }}">Mutation Tool: {{ all_data[1] }}</h5>
-                    </div>
+        <div class="split my-5 p-3">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-data-tab" data-toggle="tab"
+                    data-target="#nav-data" type="button" role="tab" aria-controls="nav-data"
+                    aria-selected="false">Mutation Data</button>
+                    <button class="nav-link" id="nav-class-tab" data-toggle="tab"
+                    data-target="#nav-class" type="button" role="tab" aria-controls="nav-class"
+                    aria-selected="false">Class under mutation</button>
                 </div>
-                <div class="row">
-                    <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
-                        <div class="card shadow-sm card-hover-shadow h-100">
-                            <div class="card-body">
-                                <h6 class="card-subtitle">Code Coverage:</h6>
-                                <div class="row align-items-center gx-2 mb-1">
-                                    <div class="col-7">
-                                        <h2 class="card-title text-inherit">{{ metric_data[4] }}%</h2>
-                                    </div>
-                                </div>
-                                <span class="text-body fs-6 ms-1">{{ metric_data[1] }}/{{ metric_data[0] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
-                        <div class="card shadow-sm card-hover-shadow h-100">
-                            <div class="card-body">
-                                <h6 class="card-subtitle">Condition Coverage:</h6>
-                                <div class="row align-items-center gx-2 mb-1">
-                                    <div class="col-7">
-                                        <h2 class="card-title text-inherit">{{ metric_data[5] }}%</h2>
-                                    </div>
-                                </div>
-                                <span class="text-body fs-6 ms-1">{{ metric_data[3] }}/{{ metric_data[2] }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
-                        <div class="card shadow-sm card-hover-shadow h-100">
-                            <div class="card-body">
-                                <h6 class="card-subtitle">Mutation Score:</h6>
-                                <div class="row align-items-center gx-2 mb-1">
-                                    <div class="col-7">
-                                        <h2 class="card-title text-inherit">{{ summary_data[3] }}%</h2>
-                                    </div>
-                                </div>
-                                <span class="text-body fs-6 ms-1">{{ summary_data[1] }}/{{ summary_data[0] }}</span>
-                                <span class="text-body fs-6 ms-1">live: {{ summary_data[2] }}</span>
-                            </div>
-                        </div>
-                    </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade pt-3 pr-3 pl-3" id="nav-class" role="tabpanel" aria-labelledby="nav-class-tab">
+                    <textarea name="test_class" id="test_class"></textarea>
                 </div>
-            </div>
-            <div class="row" id="mutation_options">
-                <div class="col ml-3">
-                    <form id="generateForm" action="javascript:generate()">
-                        <input type="checkbox" value="extend" name="mycheckbox" id="option1">
-                        <label for="option1"> Include extended test cases.</label><br>
-                        <input type="checkbox" value="exclude" name="mycheckbox" id="option2">
-                        <label for="option2"> Exclude developer test cases.</label><br>
-                        <div class="input-group">
-                            <input type="submit" class="btn btn-secondary" id="generateBtn" value="GENERATE">
-                            <div class="input-group-append">
-                              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                <div class="tab-pane fade show active pt-3 pr-3 pl-3" id="nav-data" role="tabpanel" aria-labelledby="nav-data-tab">
+                    <div id="details">
+                        <div class="row mb-3">
+                            <div class="col-4">
+                                <h5 class="mb-1" id="project_id" value="{{ all_data[0] }}">Working Project: {{ all_data[0] }}</h5>
+                            </div>
+                            <div class="col-3 pl-0">
+                                <h5 class="mb-1" id="tool_id" value="{{ all_data[1] }}">Mutation Tool: {{ all_data[1] }}</h5>
                             </div>
                         </div>
-                    </form> 
+                        <div class="row">
+                            <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
+                                <div class="card shadow-sm card-hover-shadow h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Code Coverage:</h6>
+                                        <div class="row align-items-center gx-2 mb-1">
+                                            <div class="col-7">
+                                                <h2 class="card-title text-inherit">{{ metric_data[4] }}%</h2>
+                                            </div>
+                                        </div>
+                                        <span class="text-body fs-6 ms-1">{{ metric_data[1] }}/{{ metric_data[0] }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
+                                <div class="card shadow-sm card-hover-shadow h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Condition Coverage:</h6>
+                                        <div class="row align-items-center gx-2 mb-1">
+                                            <div class="col-7">
+                                                <h2 class="card-title text-inherit">{{ metric_data[5] }}%</h2>
+                                            </div>
+                                        </div>
+                                        <span class="text-body fs-6 ms-1">{{ metric_data[3] }}/{{ metric_data[2] }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-4 mb-3 mb-lg-5">
+                                <div class="card shadow-sm card-hover-shadow h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle">Mutation Score:</h6>
+                                        <div class="row align-items-center gx-2 mb-1">
+                                            <div class="col-7">
+                                                <h2 class="card-title text-inherit">{{ summary_data[3] }}%</h2>
+                                            </div>
+                                        </div>
+                                        <span class="text-body fs-6 ms-1">{{ summary_data[1] }}/{{ summary_data[0] }}</span>
+                                        <span class="text-body fs-6 ms-1">live: {{ summary_data[2] }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="mutation_options">
+                        <div class="col ml-3">
+                            <form id="generateForm" action="javascript:generate()">
+                                <input type="checkbox" value="extend" name="mycheckbox" id="option1">
+                                <label for="option1"> Include student test cases.</label><br>
+                                <input type="checkbox" value="exclude" name="mycheckbox" id="option2" checked>
+                                <label for="option2"> Include developer test cases.</label><br>
+                                <div class="input-group">
+                                    <input type="submit" class="btn btn-secondary" id="generateBtn" value="Run">
+                                    <div class="input-group-append">
+                                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                    </div>
+                                </div>
+                            </form> 
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="container pt-5"> 
@@ -84,7 +101,7 @@
                         {% for row in sheet_data %}
                         <tr>
                             {% for cell in row %}
-                            <td> {{ cell }} </td>
+                            <td class="column-clickable"> {{ cell }} </td>
                             {% endfor %}
                         </tr>
                         {% endfor %}
@@ -97,20 +114,29 @@
                         </tr>
                     </tfoot>
                 </table>
-            </div>    
+            </div>
+            <script>
+                // Get all cells in the second column (index 1)
+                var cells = document.querySelectorAll("#livemutants td:nth-child(2)");
+    
+                // Add click event listeners to each cell
+                cells.forEach(function(cell) {
+                cell.addEventListener("click", function() {
+                    console.log("Clicked on: " + this.innerText);
+                    jumpToLine(parseInt(this.innerText));
+                });
+                });
+            </script>
         </div>
-        <div class="container my-5">
+        <div class="split my-5 p-3">
             <nav>
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                     <button class="nav-link active" id="nav-code-tab" data-toggle="tab"
                     data-target="#nav-code" type="button" role="tab" aria-controls="nav-code"
-                    aria-selected="true">Test Suite</button>
+                    aria-selected="true">Student Tests</button>
                     <button class="nav-link" id="nav-dev-tab" data-toggle="tab"
                     data-target="#nav-dev" type="button" role="tab" aria-controls="nav-dev"
                     aria-selected="false">Dev Tests</button>
-                    <button class="nav-link" id="nav-class-tab" data-toggle="tab"
-                    data-target="#nav-class" type="button" role="tab" aria-controls="nav-class"
-                    aria-selected="false">Class under test</button>
                 </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">

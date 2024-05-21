@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Welcome to Defects4j {% endblock %}</h1>
+    <h1>{% block title %} Welcome to FRAFOL {% endblock %}</h1>
     <div class="menu">
         <div class="sub_menu" id="checkout_project">
             <h5>Import Project to Test:</h5>
@@ -9,7 +9,7 @@
                 <div class="menu_block">
                     <div class="menu_item"> 
                         <label for="select_menu_one">Project</label><br>
-                        <select name="select_project" id="select_menu_one">
+                        <select name="select_project" id="select_menu_one" onchange="get_versions()">
                         {% for item in all_data[0] %}
                         <option value="{{ item }}">{{ item }}</option>
                         {% endfor %}
@@ -17,7 +17,7 @@
                     </div>
                     <div class="menu_item">
                         <label for="version">Version</label><br>
-                        <input type="number" id="version" name="version">
+                        <select name="select_version" id="version" name="version"></select>
                     </div>
                 </div>
                 <div class="input-group">

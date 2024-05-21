@@ -31,7 +31,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('index')}}">Defects4j</a>
+        <a class="navbar-brand" href="{{ url_for('index')}}">FRAFOL</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -61,11 +61,11 @@
 
         switch (project) {
           case 'Cli-32':
-            return "/root/Cli-32f/src/test/java/org/apache/commons/cli/" 
+            return "src/test/java/org/apache/commons/cli" 
           case 'Gson-15':
-            return "/root/Gson-15f/gson/src/test/java/com/google/gson/stream/"
+            return "gson/src/test/java/com/google/gson/stream"
           case 'Lang-53':
-            return "/root/Lang-53f/src/test/org/apache/commons/lang/time/"
+            return "src/test/org/apache/commons/lang/time"
           default:
             console.log(`Project ${project} not found.`);
         }
@@ -74,17 +74,17 @@
 
       function generate() {
         var code = editor.getValue(); 
-        var extended = false;
-        var exclude = false;
+        var studentTests = false;
+        var devTests = false;
 
-        var checkbox = document.getElementById("option1"); // Check if include extended test cases
+        var checkbox = document.getElementById("option1"); // Check if include student test cases
         if (checkbox.checked) {
-          extended = true;
+          studentTests = true;
         }
 
-        checkbox = document.getElementById("option2"); // Check if exclude developer test cases
+        checkbox = document.getElementById("option2"); // Check if include developer test cases
         if (checkbox.checked) {
-          exclude = true;
+          devTests = true;
         }
 
         fetch('/generate', {
@@ -92,7 +92,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ code: code, extended: extended, exclude: exclude })
+            body: JSON.stringify({ code: code, studentTests: studentTests, devTests: devTests })
         })
         .then(response => {
           if (!response.ok) {
@@ -142,7 +142,7 @@
                   headers: {
                       'Content-Type': 'application/json'
                   },
-                  body: JSON.stringify({ code: code, path: path })
+                  body: JSON.stringify({ code: code, path: path, cppath: data.cppath, project: data.project })
               });
           })
           .then(response => response.json())
@@ -188,6 +188,44 @@
             console.error('Error:', error);
         });
 
+      }
+
+      function get_versions() {
+        var project = document.getElementById('select_menu_one').value;
+
+        fetch('/project_versions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ project: project })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Get a reference to the select element
+            var selectElement = document.getElementById("version");
+
+            // Clear existing options
+            selectElement.innerHTML = '';
+
+            // Update existing options
+            for (let i = 0;  i < data.versions.length; i++) {
+              var option = document.createElement("option");
+              option.text = data.versions[i];
+              option.value = data.versions[i];
+              selectElement.add(option);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+      }
+
+      function jumpToLine(lineNumber) {
+        var t = editor3.charCoords({ line: lineNumber - 1, ch: 0 }, "local").top;
+        var middleHeight = editor3.getScrollerElement().offsetHeight / 2;
+        editor3.scrollTo(null, t - middleHeight - 5);
+        editor3.setCursor({ line: lineNumber - 1, ch: 0 });
       }
     </script>
   </body>
