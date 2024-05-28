@@ -26,7 +26,22 @@ RUN \
   rm -rf /var/lib/apt/lists/*
 
 # Java version
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
+ARG TARGETARCH
+
+# Set JAVA_HOME based on the architecture and write it to /etc/environment
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        echo "Running on ARM architecture" && \
+        echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64" >> /etc/environment; \
+    else \
+        echo "Running on AMD architecture" && \
+        echo "JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64" >> /etc/environment; \
+    fi
+
+# Use the dot command to source /etc/environment to set the environment variables
+RUN set -a && . /etc/environment && set +a
+
+# Ensure JAVA_HOME is correctly set by the previous steps
+RUN echo "JAVA_HOME: $JAVA_HOME"
 
 #############################################################################
 # Setup Defects4J

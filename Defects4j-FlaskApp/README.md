@@ -3,9 +3,7 @@
 ## Description
 FRAFOL is an educational framework designed to introduce and teach the concepts and practices of mutation testing. It provides a comprehensive environment where learners can experiment with different mutation testing tools. The framework includes a curated collection of buggy projects provided by Defects4j, offering hands-on experience in identifying and resolving code defects.
 
-## Installation
-Clone the project using the following command: `git clone https://github.com/PedroTav/Defects4jFlaskApp.git`
-
+## Docker Desktop Installation
 In order to use FRAFOL it is required to install Docker in your system. The following guidelines are instructions in the installation of Docker on both Windows, macOS and Linux machines.
 
 ### For Windows
@@ -113,7 +111,20 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
     `docker --version`
     - You should see the Docker version installed.
 
-Once Docker has been installed and running, navigate to the project directory and run the commmand:
+## FRAFOL Download
+
+### Manual Download
+To manually download the project use this [link](https://github.com/PedroTav/Defects4jFlaskApp/archive/refs/heads/master.zip).
+
+Extract the project into a directory of your choice.
+
+### Git Download
+To install Github in your system follow the [link](https://github.com/git-guides/install-git) guidelines.
+
+Clone the project into a directory of your choice using the following command: `git clone https://github.com/PedroTav/Defects4jFlaskApp.git`
+
+## FRAFOL Docker Compose
+Once Docker has been installed and running, open a terminal in the project directory and run the commmand:
 `docker compose up -d`
 
 ## Usage
