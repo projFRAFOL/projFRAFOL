@@ -81,6 +81,19 @@
         }
       }
 
+      function refreshEditor(id) {
+
+        if (id == "nav-class-tab") {
+          setTimeout(function() {
+              editor3.refresh();
+          },500);
+        } else if (id == "nav-dev-tab") {
+          setTimeout(function() {
+              editor2.refresh();
+          },500);
+        }
+      }
+
       function generate() {
         var code = editor.getValue(); 
         var studentTests = false;
@@ -237,6 +250,8 @@
         editor3.scrollTo(null, t - middleHeight - 5);
         editor3.setCursor({ line: lineNumber - 1, ch: 0 });
       }
+
+      document.addEventListener("DOMContentLoaded", get_versions());
     </script>
   </body>
 </html>

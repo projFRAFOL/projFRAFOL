@@ -40,7 +40,7 @@ app.post('/compile', (req, res) => {
   const javaCode = req.body.code;
   const cppath = req.body.cppath;
   const project = req.body.project;
-  const filePath = `/root/${project}/${req.body.stPath}/StudentTest.java`;
+  const filePath = `/root/${project}f/${req.body.stPath}/StudentTest.java`;
   console.log('FILEPATH: ' + filePath)
 
   // Write Java code to the file

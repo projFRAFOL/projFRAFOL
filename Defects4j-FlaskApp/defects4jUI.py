@@ -5,6 +5,7 @@ import subprocess
 import json
 import pathlib
 import io
+import glob
 import re
 import pandas as pd
 
@@ -50,6 +51,29 @@ def get_projects_fromjson():
             db_file.write(json.dumps([]))
 
     return project_list
+
+def clear_files():
+    
+    path = '/root/' + session["project"] + 'f/tools_output/' + session["tool"] + '/*'
+    files = glob.glob(path)
+
+    for f in files:
+        os.remove(f)
+
+def load_editor():
+
+    source_path = "static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
+    destination_path = "static/projectdata/StudentTest.java"
+
+    # Open the source file in read mode
+    with open(source_path, 'r') as source_file:
+        # Read the content from the source file
+        content = source_file.read()
+
+    # Open the destination file in write mode
+    with open(destination_path, 'w') as destination_file:
+        # Write the content to the destination file
+        destination_file.write(content)
 
 def major_parse(df):
         mutant_list = df["Mutant"].tolist()
@@ -125,13 +149,6 @@ def pit_parse(df):
             content = json.loads(j)
             operator_list.insert(i, content["mutator"][47:])
 
-        class_list = list()
-
-        for i, j in enumerate(json_list):
-            j = j.replace("\'", "\"")
-            content = json.loads(j)
-            class_list.insert(i, content["mutated_class"])
-
         method_list = list()
 
         for i, j in enumerate(json_list):
@@ -141,8 +158,8 @@ def pit_parse(df):
 
         sheet_data = list()
 
-        for item1, item2, item3, item4, item5 in zip(mutant_list, line_list, operator_list, class_list, method_list):
-            sheet_data.append((item1, item2, item3, item4, item5))
+        for item1, item2, item3, item4 in zip(mutant_list, line_list, operator_list, method_list):
+            sheet_data.append((item1, item2, item3, item4))
 
         return sheet_data
 
@@ -205,7 +222,14 @@ def summary():
     cmd = ("python3 " + path + " summary -p " + session["project_name"]
                    + " -b " + session["project_version"] + " -t " + session["tool"] + " $HOME/" + session["project"] + "f/tools_output/" + session["tool"] + filename)
     
-    output = subprocess.check_output(cmd, shell=True, text=True)
+    try: 
+
+        output = subprocess.check_output(cmd, shell=True, text=True, stderr=subprocess.STDOUT)
+
+    except subprocess.CalledProcessError as e:
+        
+        values = [0,0,0,0]
+        return values
 
     # Define pattern to match key-value pairs
     pattern = r'([^:]+):\s+(.*)'
@@ -216,12 +240,18 @@ def summary():
     # Convert matches to a dictionary
     data = {key.strip(): value.strip() for key, value in matches}
 
-    values = [data["Total mutants count"], data["Killed mutants count"], data["Live mutants count"], (round(float(data["Mutation score"]),4))*100]
+    values = [data["Total mutants count"], data["Killed mutants count"], data["Live mutants count"], round(float(data["Mutation score"])*100,2)]
 
     return values
 
 def save_testsuite(data):
     
+    path = "static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
+    
+    file = open(path, "w")
+    file.write(data)
+    file.close()
+
     path = "static/projectdata/StudentTest.java"
     
     file = open(path, "w")
@@ -294,7 +324,7 @@ def load_project():
 
     match session["tool"]:
             case "pit":
-                table_header = ["Mutant", "Line", "Operator", "Class", "Method"]
+                table_header = ["Mutant", "Line", "Operator", "Method"]
             case "major":
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
             case _:
@@ -302,6 +332,8 @@ def load_project():
 
     session["metric_data"] = coverage()
     session.modified = True
+
+    load_editor()
 
     return render_template('project.html', all_data = [session["project"], session["tool"]],
                             table_header = table_header, sheet_data = sheet_data,
@@ -311,13 +343,14 @@ def load_project():
 def generate():
     data = request.json
 
+    clear_files()
     save_testsuite(data['code'])
 
     student_tests = ""
     dev_tests = ""
 
     if data['studentTests']:
-        student_tests = " -t static/projectdata/StudentTest.java"
+        student_tests = " -t static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
 
     if data['devTests']:
         dev_tests = " --all-dev"
@@ -334,6 +367,9 @@ def working_project():
     cmd = ("defects4j export -p cp.test -w $HOME/" + session["project"] + "f")
     output = subprocess.check_output(cmd, shell=True, text=True)
 
+    match session["project"]:
+        case "Cli-32":
+            output = "/root/Cli-32f/target/classes:/root/Cli-32f/target/test-classes:/root/Cli-32f/file:/defects4j/framework/projects/lib/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/commons-lang/commons-lang/2.1/commons-lang-2.1.jar:/defects4j/framework/projects/Cli/lib/jdepend/jdepend/2.5/jdepend-2.5.jar:/defects4j/framework/projects/Cli/lib/junit-addons/junit-addons/1.4/junit-addons-1.4.jar:/defects4j/framework/projects/Cli/lib/junit/junit/3.8.1/junit-3.8.1.jar:/defects4j/framework/projects/Cli/lib/junit/junit/3.8.2/junit-3.8.2.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.11/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.12/junit-4.12.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.8.2/junit-4.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/junit-addons/junit-addons/1.4/junit-addons-1.4.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/3.8.1/junit-3.8.1.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/3.8.2/junit-3.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.11/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.12/junit-4.12.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.8.2/junit-4.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/defects4j/framework/projects/Cli/lib/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
     return jsonify({'project': session["project"], 'cppath': output})
 
 @app.route('/project_versions', methods=['post'])
@@ -380,7 +416,7 @@ def analyze():
     match session["tool"]:
             case "pit":
                 sheet_data = pit_parse(df)
-                table_header = ["Mutant", "Line", "Operator", "Class", "Method"]
+                table_header = ["Mutant", "Line", "Operator", "Method"]
             case "major":
                 sheet_data = major_parse(df)
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]

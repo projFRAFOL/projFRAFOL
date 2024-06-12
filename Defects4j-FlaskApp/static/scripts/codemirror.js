@@ -2,6 +2,7 @@ var editor = CodeMirror.fromTextArea(
     document.getElementById('editor'),{
     mode: "text/x-java",
     indentWithTabs: true,
+    autoRefresh:true,
     smartIndent: true,
     lineNumbers: true,
     lineWrapping: true,
@@ -17,6 +18,7 @@ var editor2 = CodeMirror.fromTextArea(
     document.getElementById('dev_suite'),{
     mode: "text/x-java",
     indentWithTabs: true,
+    autoRefresh:true,
     smartIndent: true,
     lineNumbers: true,
     lineWrapping: true,
@@ -32,6 +34,7 @@ var editor3 = CodeMirror.fromTextArea(
     document.getElementById('test_class'),{
     mode: "text/x-java",
     indentWithTabs: true,
+    autoRefresh:true,
     smartIndent: true,
     lineNumbers: true,
     lineWrapping: true,
@@ -51,6 +54,7 @@ var outputTerminal = CodeMirror.fromTextArea(
     lineWrapping: true,
     matchBrackets: true,
     autofocus: true,
+    readOnly: true,
     theme: "blackboard"
     }
 );
