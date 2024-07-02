@@ -130,13 +130,13 @@ Once Docker has been installed and running, open a terminal in the project direc
 ## Usage
 Open a browser page, using the url http://localhost:8000/.
 
-![FRAFOL Landing Page](./assets/images/landing.jpg "Landing Page")
+![FRAFOL Landing Page](./Defects4j-FlaskApp/assets/images/landing.jpg "Landing Page")
 
 From here, select a project from the dropdown menu, indicating the buggy version for the specific project. Clicking import will add the selection to the list of projects that are currently being tested.
 
 Select a project from the list of imported projects and the mutation tool to be applied. Click open to initiate the chosen project and begin writing test cases.
 
-![Project Working Page](./assets/images/working.jpg "Project Page")
+![Project Working Page](./Defects4j-FlaskApp/assets/images/working.jpg "Project Page")
 
 The following page includes an editor for writing test cases and a dashboard of information regarding mutation testing.
 
