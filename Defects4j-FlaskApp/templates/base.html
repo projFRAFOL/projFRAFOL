@@ -14,9 +14,9 @@
     <!-- CodeMirror -->
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/lib/codemirror.css')}}">
     <script src="{{url_for('static', filename='codemirror/lib/codemirror.js')}}"></script>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/theme/monokai.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/theme/default.css')}}">
     <script src="{{url_for('static', filename='codemirror/mode/clike/clike.js')}}"></script>
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/theme/blackboard.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/theme/3024-day.css')}}">
     <script src="{{url_for('static', filename='codemirror/mode/clike/clike.js')}}"></script>
     <!-- Datatables -->
     <script defer src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -144,55 +144,26 @@
 
       function compile() {
           var code = editor.getValue();
-          var server = 'http://localhost:3000/compile';
-          var path = "";
 
           fetch('/working_project', {
-              method: 'GET'
-          })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Failed to fetch working project');
-              }
-              return response.json();
-          })
-          .then(data => {
-              stPath = testSuitePath(data.project);
-              clPath = classPath(data.project);
-          
-              return fetch(server, {
-                  method: 'POST',
-                  headers: {
+              method: 'POST',
+              headers: {
                       'Content-Type': 'application/json'
                   },
-                  body: JSON.stringify({ code: code, stPath: stPath, clPath: clPath, cppath: data.cppath, project: data.project })
-              });
+                  body: JSON.stringify({ code: code })
           })
           .then(response => response.json())
           .then(data => {
-              outputTerminal.setValue(data.message || data.error);
+              outputTerminal.setValue(data.message);
           })
           .catch(error => {
               console.error('Error:', error);
-          });
+          });      
       }
 
       function checkout() {
-        var server = 'http://localhost:3000/checkout';
         var version = document.getElementById('version').value;
         var project = document.getElementById('select_menu_one').value;
-
-        fetch(server, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ project: project, version: version })
-        })
-        .then(response => response.json())
-        .catch(error => {
-            console.error('Error:', error);
-        });
 
         fetch('/checkout_project', {
             method: 'POST',

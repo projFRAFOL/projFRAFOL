@@ -12,10 +12,3 @@ services:
       - "8000:8000"
     restart: always
 
-  nodejs:
-    image: errorhandler
-    build:
-      context: ./nodejs
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"

@@ -8,7 +8,7 @@ var editor = CodeMirror.fromTextArea(
     lineWrapping: true,
     matchBrackets: true,
     autofocus: true,
-    theme: "monokai"
+    theme: "default"
     }
 );
 
@@ -24,7 +24,7 @@ var editor2 = CodeMirror.fromTextArea(
     lineWrapping: true,
     matchBrackets: true,
     autofocus: true,
-    theme: "monokai"
+    theme: "default"
     }
 );
 
@@ -40,7 +40,7 @@ var editor3 = CodeMirror.fromTextArea(
     lineWrapping: true,
     matchBrackets: true,
     autofocus: true,
-    theme: "monokai"
+    theme: "default"
     }
 );
 
@@ -55,7 +55,7 @@ var outputTerminal = CodeMirror.fromTextArea(
     matchBrackets: true,
     autofocus: true,
     readOnly: true,
-    theme: "blackboard"
+    theme: "3024-day"
     }
 );
 

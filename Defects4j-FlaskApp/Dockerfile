@@ -55,6 +55,7 @@ RUN git clone https://github.com/PedroTav/defects4j.git defects4j
 WORKDIR /defects4j
 RUN cpanm --installdeps .
 RUN ./init.sh
+RUN pip install "numpy<2"
 RUN pip install pandas==2.1.1
 
 # ----------- Step 3. Add Defects4J's executables to PATH: ------

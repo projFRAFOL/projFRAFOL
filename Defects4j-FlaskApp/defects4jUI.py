@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, Response, session, jsonify, url_for
-from flask_cors import CORS
 import os
 import subprocess
 import json
@@ -12,7 +11,7 @@ import pandas as pd
 app = Flask(__name__)
 app.secret_key = "e60OMnoWrQaHjlz"
 app.config["SESSION_COOKIE_NAME"] = "4yRw187RKmd31B4"
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+
 
 def get_projects_id():
     project_list = list()
@@ -361,8 +360,11 @@ def generate():
 
     return jsonify({'message': 'Mutants generated successfully'}), 205
 
-@app.route('/working_project', methods=['get'])
+@app.route('/working_project', methods=['post'])
 def working_project():
+    data = request.json
+
+    save_testsuite(data['code'])
 
     cmd = ("defects4j export -p cp.test -w $HOME/" + session["project"] + "f")
     output = subprocess.check_output(cmd, shell=True, text=True)
@@ -370,7 +372,22 @@ def working_project():
     match session["project"]:
         case "Cli-32":
             output = "/root/Cli-32f/target/classes:/root/Cli-32f/target/test-classes:/root/Cli-32f/file:/defects4j/framework/projects/lib/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/commons-lang/commons-lang/2.1/commons-lang-2.1.jar:/defects4j/framework/projects/Cli/lib/jdepend/jdepend/2.5/jdepend-2.5.jar:/defects4j/framework/projects/Cli/lib/junit-addons/junit-addons/1.4/junit-addons-1.4.jar:/defects4j/framework/projects/Cli/lib/junit/junit/3.8.1/junit-3.8.1.jar:/defects4j/framework/projects/Cli/lib/junit/junit/3.8.2/junit-3.8.2.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.11/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.12/junit-4.12.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.8.2/junit-4.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/junit-addons/junit-addons/1.4/junit-addons-1.4.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/3.8.1/junit-3.8.1.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/3.8.2/junit-3.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.11/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.12/junit-4.12.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.8.2/junit-4.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/defects4j/framework/projects/Cli/lib/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
-    return jsonify({'project': session["project"], 'cppath': output})
+    
+    path = "static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
+
+    cmd = ["javac", "-classpath", output, path]
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+
+    stdout, stderr = process.communicate()
+
+    stdout = stdout.decode('utf-8')
+    stderr = stderr.decode('utf-8')
+
+    if process.returncode == 0:
+        return jsonify({'message': "Compilation succeeded."})
+    else:
+        return jsonify({'message': "Compilation failed with return code: " + str(process.returncode) + "\n" + stderr})
 
 @app.route('/project_versions', methods=['post'])
 def project_versions():
