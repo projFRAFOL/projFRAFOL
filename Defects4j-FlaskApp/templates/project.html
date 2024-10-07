@@ -72,16 +72,15 @@
                     </div>
                     <div class="row" id="mutation_options">
                         <div class="col ml-3">
-                            <form id="generateForm" action="javascript:generate()">
+                            <form id="generateForm" action="javascript:compile()">
                                 <input type="checkbox" value="extend" name="mycheckbox" id="option1">
                                 <label for="option1"> Include student test cases.</label><br>
                                 <input type="checkbox" value="exclude" name="mycheckbox" id="option2" checked>
                                 <label for="option2"> Include developer test cases.</label><br>
                                 <div class="input-group">
-                                    <input type="submit" class="btn btn-secondary" id="generateBtn" value="Mutate">
-                                    <div class="input-group-append">
-                                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                    </div>
+                                    <button type="submit" class="submit" id="generateBtn">
+                                        <span class="submit__text">Mutate</span>
+                                    </button>
                                 </div>
                             </form> 
                         </div>
@@ -151,7 +150,6 @@
                 </div>
                 <div class="output pt-1 pr-3 pl-3 pb-3">
                     <textarea name="console" id="console"></textarea>
-                    <button onclick="compile()">Compile</button>
                 </div> 
             </div>
         </div>

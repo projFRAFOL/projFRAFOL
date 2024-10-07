@@ -18,6 +18,8 @@
     <script src="{{url_for('static', filename='codemirror/mode/clike/clike.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/theme/3024-day.css')}}">
     <script src="{{url_for('static', filename='codemirror/mode/clike/clike.js')}}"></script>
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='codemirror/addon/hint/show-hint.css')}}">
+    <script src="{{url_for('static', filename='codemirror/addon/hint/show-hint.js')}}"></script>
     <!-- Datatables -->
     <script defer src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -25,6 +27,8 @@
     <script defer src="https://cdn.datatables.net/2.0.3/js/dataTables.bootstrap5.js"></script>
     <script defer src="{{url_for('static', filename='scripts/datatables.js')}}"></script>
     <script defer src="{{url_for('static', filename='scripts/spinner.js')}}"></script>
+    <script defer src="{{url_for('static', filename='addon/hint/show-hint.js')}}"></script>
+    <script defer src="{{url_for('static', filename='addon/hint/anyword-hint.js')}}"></script>
     <script defer src="{{url_for('static', filename='scripts/codemirror.js')}}"></script>
 
     <title>{% block title %} {% endblock %}</title>
@@ -144,6 +148,8 @@
 
       function compile() {
           var code = editor.getValue();
+          var btn = document.getElementById('generateBtn');
+          btn.classList.add("submit--loading");
 
           fetch('/working_project', {
               method: 'POST',
@@ -154,7 +160,12 @@
           })
           .then(response => response.json())
           .then(data => {
-              outputTerminal.setValue(data.message);
+              if (data.message === "Compilation succeeded.") {
+                generate();
+              } else {
+                outputTerminal.setValue(data.message);
+                btn.classList.remove("submit--loading");
+              }
           })
           .catch(error => {
               console.error('Error:', error);
@@ -164,6 +175,8 @@
       function checkout() {
         var version = document.getElementById('version').value;
         var project = document.getElementById('select_menu_one').value;
+        var btn = document.getElementById('importBtn');
+        btn.classList.add("submit--loading");
 
         fetch('/checkout_project', {
             method: 'POST',
@@ -182,6 +195,37 @@
             console.error('Error:', error);
         });
 
+      }
+
+      function load() {
+        var tool = document.getElementById('tool').value;
+        var project = document.getElementById('select_menu_two').value;
+        var btn = document.getElementById('openBtn');
+        btn.classList.add("submit--loading");
+
+        fetch('/load_project', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ tool: tool, project: project })
+        })
+        .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          // Parse the JSON response, if needed
+          return response.text();
+        })
+        .then(htmlContent => {
+          // Replace the current page content with the new content
+          document.open();
+          document.write(htmlContent);
+          document.close();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
       }
 
       function get_versions() {

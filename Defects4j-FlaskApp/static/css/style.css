@@ -10,6 +10,14 @@ h1 {
     padding: 10px;
 }
 
+h2 {
+    font-size: clamp(14px, 17px, 20px);
+}
+
+h5 {
+    font-size: clamp(14px, 17px, 20px);
+}
+
 .main-container {
     width: 100%;
     overflow: hidden;
@@ -94,4 +102,55 @@ h1 {
 td.column-clickable:hover {
   background-color: #f2f2f2;
   cursor: pointer;
+}
+
+.submit {
+  position: relative;
+  padding: 6px 14px;
+  background: #6c757d;
+  border: none;
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.submit:active {
+  background: #D3D3D3;
+}
+
+.submit__text {
+  font: 18px Arial, Helvetica, sans-serif;
+  color: #ffffff;
+  transition: all 0.2s;
+}
+
+.submit--loading .submit__text {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.submit--loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border: 4px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: submit-loading-spinner 1s ease infinite;
+}
+
+@keyframes submit-loading-spinner {
+  from {
+    transform: rotate(0turn);
+  }
+
+  to {
+    transform: rotate(1turn);
+  }
 }

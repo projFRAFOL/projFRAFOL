@@ -21,16 +21,15 @@
                     </div>
                 </div>
                 <div class="input-group">
-                    <input type="submit" class="btn btn-secondary" id="importBtn" value="Import">
-                    <div class="input-group-append">
-                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    </div>
+                    <button type="submit" class="submit" id="importBtn">
+                        <span class="submit__text">Import</span>
+                    </button>
                 </div>
             </form>
         </div>
         <div class="sub_menu" id="load_project">
             <h5>Open Project:</h5>
-            <form id="loadForm" action="/load_project" method="POST">
+            <form id="loadForm" action="javascript:load()">
                 <div class="menu_block">
                     <div class="menu_item">
                         <label for="select_menu_two">Project</label><br>
@@ -49,13 +48,11 @@
                     </div>
                 </div>
                 <div class="input-group">
-                    <input type="submit" class="btn btn-secondary" id="openBtn" value="Open">
-                    <div class="input-group-append">
-                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    </div>
+                    <button type="submit" class="submit" id="openBtn">
+                        <span class="submit__text">Open</span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 {% endblock %}
-

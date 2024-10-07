@@ -169,26 +169,53 @@ def load_csv():
     return df
 
 def get_class_path(project):
-    match project:
-        case 'Cli-32':
-            return "/root/Cli-32f/src/main/java/org/apache/commons/cli/HelpFormatter.java" 
-        case 'Gson-15':
-            return "/root/Gson-15f/gson/src/main/java/com/google/gson/stream/JsonWriter.java"
-        case 'Lang-53':
-            return "/root/Lang-53f/src/java/org/apache/commons/lang/time/DateUtils.java"
-        case _:
-            print("Invalid project selection was found.")
+
+    path = "/root/" + project + "f"
+
+    if not os.path.isdir(path):
+        raise ValueError(f"The directory {path} does not exist.")
+    
+    cmd = "defects4j export -p dir.src.classes"
+
+    result = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    src = result.stdout
+
+    cmd = "defects4j export -p classes.modified"
+
+    result = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    bin = result.stdout
+
+    bin = bin.replace('.', '/')
+
+    return path + "/" + src + "/" + bin + ".java"
 
 def get_devsuite_path(project):
-    match project:
-        case 'Cli-32':
-            return "/root/Cli-32f/src/test/java/org/apache/commons/cli/HelpFormatterTest.java" 
-        case 'Gson-15':
-            return "/root/Gson-15f/gson/src/test/java/com/google/gson/stream/JsonWriterTest.java"
-        case 'Lang-53':
-            return "/root/Lang-53f/src/test/org/apache/commons/lang/time/DateUtilsTest.java"
-        case _:
-            print("Invalid project selection was found.")
+
+    path = "/root/" + project + "f"
+
+    if not os.path.isdir(path):
+        raise ValueError(f"The directory {path} does not exist.")
+    
+    cmd = "defects4j export -p dir.src.tests"
+
+    result = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    src = result.stdout
+
+    cmd = "defects4j export -p classes.modified"
+
+    new_cmd = "defects4j query -p " + project + " -q classes.relevant.test"
+    new_cmd_result = subprocess.run(new_cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    result = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    bin = result.stdout
+
+    bin = bin.replace('.', '/')
+
+    return path + "/" + src + "/" + bin + "Test.java"
 
 def file_data(path):
     data = str()
@@ -301,8 +328,13 @@ def checkout_project():
 
 @app.route('/load_project', methods=['post'])
 def load_project():
-    session["project"] = request.form["project"]
-    session["tool"] = request.form["select_tool"]
+    data = request.json
+
+    project = data['project']
+    tool = data['tool']
+
+    session["project"] = project
+    session["tool"] = tool
     session["summary_data"] = ['0','0','0','0']
     session.modified = True
     sheet_data = list()
