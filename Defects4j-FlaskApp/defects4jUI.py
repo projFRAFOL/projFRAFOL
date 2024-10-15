@@ -2,54 +2,15 @@ from flask import Flask, render_template, request, Response, session, jsonify, u
 import os
 import subprocess
 import json
-import pathlib
-import io
 import glob
 import re
 import pandas as pd
+import projectmanager as pm
+import jsoneditor as je
 
 app = Flask(__name__)
 app.secret_key = "e60OMnoWrQaHjlz"
 app.config["SESSION_COOKIE_NAME"] = "4yRw187RKmd31B4"
-
-
-def get_projects_id():
-    project_list = list()
-    path = os.path.split(os.getcwd())[0] + 'defects4j/framework/projects'
-    items = os.listdir(path)
-
-    for item in items:
-        if os.path.isdir(path + '/' + item):
-            project_list.append(item)
-
-    return project_list
-
-def get_project_versions(project):
-    path = os.path.split(os.getcwd())[0] + 'defects4j/framework/projects/' + project + '/active-bugs.csv'
-    df = pd.read_csv(path)
-    return df['bug.id'].tolist()
-
-def get_projects_fromjson():
-    path = pathlib.Path().resolve() / "data.json"
-    project_list = list()
-
-    if os.path.isfile(path) and os.access(path, os.R_OK):
-        # checks if file exists
-        print("File exists and is readable")
-        f = open('data.json')
-        data = json.load(f)
-
-        for i in data:
-            if "name" in i:
-                project_list.append(i['name'])
-
-        f.close()
-    else:
-        print("Either file is missing or is not readable, creating file...")
-        with io.open(os.path.join(pathlib.Path().resolve(), 'data.json'), 'w') as db_file:
-            db_file.write(json.dumps([]))
-
-    return project_list
 
 def clear_files():
     
@@ -61,13 +22,8 @@ def clear_files():
 
 def load_editor():
 
-    source_path = "static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
+    content = je.load_json_save(session["project_name"], session["project_version"])
     destination_path = "static/projectdata/StudentTest.java"
-
-    # Open the source file in read mode
-    with open(source_path, 'r') as source_file:
-        # Read the content from the source file
-        content = source_file.read()
 
     # Open the destination file in write mode
     with open(destination_path, 'w') as destination_file:
@@ -204,18 +160,21 @@ def get_devsuite_path(project):
 
     src = result.stdout
 
-    cmd = "defects4j export -p classes.modified"
+    aux = project.split("-")
+    id = aux[0]
+    version = aux[1]
 
-    new_cmd = "defects4j query -p " + project + " -q classes.relevant.test"
-    new_cmd_result = subprocess.run(new_cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
+    cmd = "defects4j query -p " + id + " -q classes.relevant.test -o test.csv"
     result = subprocess.run(cmd, shell=True, cwd=path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-    bin = result.stdout
+    df = pd.read_csv("/root/" + project + "f/test.csv")
+    value = df.isin([int(version)])
+    row, col = value.idxmax()
+    bin = str(df.iat[row,1])
 
     bin = bin.replace('.', '/')
 
-    return path + "/" + src + "/" + bin + "Test.java"
+    return path + "/" + src + "/" + bin + ".java"
 
 def file_data(path):
     data = str()
@@ -271,12 +230,10 @@ def summary():
     return values
 
 def save_testsuite(data):
+
+    save_data = {"project": session["project_name"], "version": session["project_version"], "content": data}
     
-    path = "static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
-    
-    file = open(path, "w")
-    file.write(data)
-    file.close()
+    je.create_json_save(save_data)
 
     path = "static/projectdata/StudentTest.java"
     
@@ -286,8 +243,8 @@ def save_testsuite(data):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    session["ids"] = get_projects_id()
-    session["projects"] = get_projects_fromjson()
+    session["ids"] = pm.get_projects_id()
+    session["projects"] = pm.get_projects_fromjson()
 
     return render_template('index.html', all_data = [session["ids"], session["projects"]])
 
@@ -381,7 +338,7 @@ def generate():
     dev_tests = ""
 
     if data['studentTests']:
-        student_tests = " -t static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
+        student_tests = " -t static/projectdata/StudentTest.java"
 
     if data['devTests']:
         dev_tests = " --all-dev"
@@ -405,7 +362,7 @@ def working_project():
         case "Cli-32":
             output = "/root/Cli-32f/target/classes:/root/Cli-32f/target/test-classes:/root/Cli-32f/file:/defects4j/framework/projects/lib/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/commons-lang/commons-lang/2.1/commons-lang-2.1.jar:/defects4j/framework/projects/Cli/lib/jdepend/jdepend/2.5/jdepend-2.5.jar:/defects4j/framework/projects/Cli/lib/junit-addons/junit-addons/1.4/junit-addons-1.4.jar:/defects4j/framework/projects/Cli/lib/junit/junit/3.8.1/junit-3.8.1.jar:/defects4j/framework/projects/Cli/lib/junit/junit/3.8.2/junit-3.8.2.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.11/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.12/junit-4.12.jar:/defects4j/framework/projects/Cli/lib/junit/junit/4.8.2/junit-4.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/junit-addons/junit-addons/1.4/junit-addons-1.4.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/3.8.1/junit-3.8.1.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/3.8.2/junit-3.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.11/junit-4.11.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.12/junit-4.12.jar:/defects4j/framework/projects/Cli/lib/lib/junit/junit/4.8.2/junit-4.8.2.jar:/defects4j/framework/projects/Cli/lib/lib/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:/defects4j/framework/projects/Cli/lib/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
     
-    path = "static/projectdata/projects/"+ session["project_name"] + "/StudentTest.java"
+    path = "static/projectdata/StudentTest.java"
 
     cmd = ["javac", "-classpath", output, path]
 
@@ -425,7 +382,7 @@ def working_project():
 def project_versions():
     data = request.json
 
-    versions = get_project_versions(data['project'])
+    versions = pm.get_project_versions(data['project'])
 
     print("VERSIONS: \n")
     print(versions)
