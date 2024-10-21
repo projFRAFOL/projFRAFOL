@@ -57,6 +57,7 @@ RUN cpanm --installdeps .
 RUN ./init.sh
 RUN pip install "numpy<2"
 RUN pip install pandas==2.1.1
+RUN pip install beautifulsoup4
 
 # ----------- Step 3. Add Defects4J's executables to PATH: ------
 ENV PATH="/defects4j/framework/bin:${PATH}"  

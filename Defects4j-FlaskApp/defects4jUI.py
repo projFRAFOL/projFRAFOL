@@ -7,6 +7,7 @@ import re
 import pandas as pd
 import projectmanager as pm
 import jsoneditor as je
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 app.secret_key = "e60OMnoWrQaHjlz"
@@ -280,8 +281,36 @@ def checkout_project():
             json.dump(data, json_file,
                       indent=4,
                       separators=(',', ': '))
+            
+    add_junit5_to_pom(session["project"] + "f")
 
     return jsonify({'message': 'Project checkout successfully'}), 205
+
+def add_junit5_to_pom(project):
+    print('adding JUnit5 dependency to pom...')
+    pompath = "/root/" + project + "/pom.xml"
+
+    data = None
+    with open(pompath, "r") as f:
+        data = f.read()
+
+        new_dependency = """<dependency>
+            <groupId>org.junit</groupId>
+            <artifactId>junit-bom</artifactId>
+            <version>5.11.3</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>"""
+
+        data.replace("<dependencies>", "<dependencies>\n" + new_dependency)
+
+    os.remove(pompath)
+
+    with open(pompath, "w") as f:
+        f.write(data)
+        f.close()
+    
+    return        
 
 @app.route('/load_project', methods=['post'])
 def load_project():
