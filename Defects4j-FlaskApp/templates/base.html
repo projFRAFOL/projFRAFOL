@@ -137,6 +137,7 @@
         })
         .then(htmlContent => {
           // Replace the current page content with the new content
+          btn.classList.remove("submit--loading");
           document.open();
           document.write(htmlContent);
           document.close();
@@ -144,6 +145,25 @@
         .catch(error => {
             console.error('Error:', error);
         });
+      }
+
+      function error_check() {
+          var code = editor.getValue();   
+          
+          fetch('/working_project', {
+            method: 'POST',
+            headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
+          })
+          .then(response => response.json())
+          .then(data => {
+              outputTerminal.setValue(data.message);
+          })
+          .catch(error => {
+              console.error('Error:', error);
+          });    
       }
 
       function compile() {
@@ -168,7 +188,8 @@
               }
           })
           .catch(error => {
-              console.error('Error:', error);
+            btn.classList.remove("submit--loading");
+            console.error('Error:', error);
           });      
       }
 
@@ -257,6 +278,20 @@
         .catch(error => {
             console.error('Error:', error);
         });
+      }
+
+      function get_killed_list() {
+          return fetch('/killed_list', {
+              method: 'POST'
+          })
+          .then(response => response.json())
+          .then(data => {
+              return data.list;
+          })
+          .catch(error => {
+              console.error('Error:', error);
+              return [];
+          });
       }
 
       function jumpToLine(lineNumber) {

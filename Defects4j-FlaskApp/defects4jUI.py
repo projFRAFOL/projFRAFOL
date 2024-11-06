@@ -31,97 +31,118 @@ def load_editor():
         destination_file.write(content)
 
 def major_parse(df):
-        mutant_list = df["Mutant"].tolist()
+    mutant_list = df["Mutant"].tolist()
 
-        path = '/root/' + session["project"] + 'f/tools_output/major/'
-        filetype = "*.csv"
-        filename = ""
-        for file_path in os.listdir(path):
-            if file_path.endswith(filetype[1:]):
-                filename = file_path
+    path = '/root/' + session["project"] + 'f/tools_output/major/'
+    filetype = "*.csv"
+    filename = ""
+    for file_path in os.listdir(path):
+        if file_path.endswith(filetype[1:]):
+            filename = file_path
 
-        path_csv = path + '/' + filename
+    path_csv = path + '/' + filename
 
-        kill_csv = pd.read_csv(path_csv)
+    kill_csv = pd.read_csv(path_csv)
 
-        mutant_nr = kill_csv["MutantNo"].tolist()
-        live_mutant = kill_csv["[FAIL | TIME | EXC | LIVE]"].tolist()
+    mutant_nr = kill_csv["MutantNo"].tolist()
+    live_mutant = kill_csv["[FAIL | TIME | EXC | LIVE]"].tolist()
 
-        live_mutant_ids = list()
+    live_mutant_ids = list()
 
-        for item1, item2 in zip(mutant_nr, live_mutant):
-            if item2 == 'LIVE':
-                live_mutant_ids.append(item1)
+    for item1, item2 in zip(mutant_nr, live_mutant):
+        if item2 == 'LIVE':
+            live_mutant_ids.append(item1)
 
-        filetype = "*.log"
-        filename = ""
-        for file_path in os.listdir(path):
-            if file_path.endswith(filetype[1:]):
-                filename = file_path
+    filetype = "*.log"
+    filename = ""
+    for file_path in os.listdir(path):
+        if file_path.endswith(filetype[1:]):
+            filename = file_path
 
-        path_log = path + '/' + filename
+    path_log = path + '/' + filename
 
-        with open(path_log) as f:
-            f = f.readlines()
+    with open(path_log) as f:
+        f = f.readlines()
 
-        line_list = list()
-        operator_list = list()
-        original_list = list()
-        mutated_list = list()
+    line_list = list()
+    operator_list = list()
+    original_list = list()
+    mutated_list = list()
 
-        for line in f:
-            attributes = re.split(":", line)
-            if int(attributes[0]) in live_mutant_ids:
-                line_list.append(attributes[5])
-                operator_list.append(attributes[1])
-                original_list.append(attributes[2])
-                mutated_list.append(attributes[3])
+    for line in f:
+        attributes = re.split(":", line)
+        if int(attributes[0]) in live_mutant_ids:
+            line_list.append(attributes[5])
+            operator_list.append(attributes[1])
+            original_list.append(attributes[2])
+            mutated_list.append(attributes[3])
 
-        sheet_data = list()
+    sheet_data = list()
 
-        for item1, item2, item3, item4, item5 in zip(mutant_list, line_list, operator_list, original_list,
-                                                     mutated_list):
-            sheet_data.append((item1, item2, item3, item4, item5))
+    for item1, item2, item3, item4, item5 in zip(mutant_list, line_list, operator_list, original_list,
+                                                    mutated_list):
+        sheet_data.append((item1, item2, item3, item4, item5))
 
-        return sheet_data
+    return sheet_data
 
 def pit_parse(df):
-        mutant_list = df["Mutant"].tolist()
+    mutant_list = df["Mutant"].tolist()
 
-        json_list = df.iloc[:, 1].tolist()
+    json_list = df.iloc[:, 1].tolist()
 
-        line_list = list()
+    line_list = list()
 
-        for i, j in enumerate(json_list):
-            j = j.replace("\'", "\"")
-            content = json.loads(j)
-            line_list.insert(i, content["line"])
+    for i, j in enumerate(json_list):
+        j = j.replace("\'", "\"")
+        content = json.loads(j)
+        line_list.insert(i, content["line"])
 
-        operator_list = list()
+    operator_list = list()
 
-        for i, j in enumerate(json_list):
-            j = j.replace("\'", "\"")
-            content = json.loads(j)
-            operator_list.insert(i, content["mutator"][47:])
+    for i, j in enumerate(json_list):
+        j = j.replace("\'", "\"")
+        content = json.loads(j)
+        operator_list.insert(i, content["mutator"][47:])
 
-        method_list = list()
+    method_list = list()
 
-        for i, j in enumerate(json_list):
-            j = j.replace("\'", "\"")
-            content = json.loads(j)
-            method_list.insert(i, content["mutated_method"])
+    for i, j in enumerate(json_list):
+        j = j.replace("\'", "\"")
+        content = json.loads(j)
+        method_list.insert(i, content["mutated_method"])
 
-        sheet_data = list()
+    sheet_data = list()
 
-        for item1, item2, item3, item4 in zip(mutant_list, line_list, operator_list, method_list):
-            sheet_data.append((item1, item2, item3, item4))
+    for item1, item2, item3, item4 in zip(mutant_list, line_list, operator_list, method_list):
+        sheet_data.append((item1, item2, item3, item4))
 
-        return sheet_data
+    return sheet_data
 
-def load_csv():
+def csv_compare(df1, df2):
+
+    ids_df1 = set(df1['Mutant'])
+    ids_df2 = set(df2['Mutant'])
+
+    mutant_list = list(ids_df1 - ids_df2)
+
+    return mutant_list
+
+
+def store_csv():
+
     path = "/root/results.csv"
 
     df = pd.read_csv(path)
+
+    if not os.path.exists("/root/" + session["project"] + ".csv"):
+        df.to_csv("/root/" + session["project"] + ".csv", index=False)
+
+def load_csv(project):
+    
+    path = "/root/" + project + ".csv"
+
+    df = pd.read_csv(path)
+
     return df
 
 def get_class_path(project):
@@ -389,10 +410,33 @@ def project_versions():
 
     return jsonify({'versions': versions}), 200
 
+@app.route('/killed_list', methods=['post'])
+def killed_list():
+
+    df1 = load_csv("results")
+    df2 = load_csv(session["project"])
+
+    mutant_list = list()
+
+    match session["tool"]:
+        case "pit":
+            mutant_list = csv_compare(df2, df1)
+        case "major":
+            mutant_list = csv_compare(df2, df1)
+        case _:
+            print("No tool selection was found.")
+
+    print(mutant_list)
+
+    return jsonify({'list': mutant_list}), 200
+
 @app.route('/analyze', methods=['post'])
 def analyze():
     path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/reportsanalyzer.py'
     sheet_data = list()
+
+    if os.path.exists("/root/results.csv"):
+        os.remove("/root/results.csv")
 
     match session["tool"]:
             case "pit":
@@ -416,15 +460,16 @@ def analyze():
             case _:
                 print("No tool selection was found.")
 
-    df = load_csv()
+    store_csv()
+    df2 = load_csv(session["project"])
     table_header = list()
 
     match session["tool"]:
             case "pit":
-                sheet_data = pit_parse(df)
+                sheet_data = pit_parse(df2)
                 table_header = ["Mutant", "Line", "Operator", "Method"]
             case "major":
-                sheet_data = major_parse(df)
+                sheet_data = major_parse(df2)
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
             case _:
                 print("No tool selection was found.")
@@ -433,7 +478,7 @@ def analyze():
     session.modified = True
 
     return render_template('project.html', all_data = [session["project"], session["tool"]],
-                            table_header = table_header, sheet_data = sheet_data,
+                            table_header = table_header, sheet_data = sheet_data, 
                             metric_data = session["metric_data"], summary_data = session["summary_data"])
 
 

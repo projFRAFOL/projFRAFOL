@@ -77,12 +77,15 @@
                                 <label for="option1"> Include student test cases.</label><br>
                                 <input type="checkbox" value="exclude" name="mycheckbox" id="option2" checked>
                                 <label for="option2"> Include developer test cases.</label><br>
-                                <div class="input-group">
+                                <div class="row" style="display: flex; flex-direction: row; grid-gap: 10px; margin-top: 10px;">
                                     <button type="submit" class="submit" id="generateBtn">
                                         <span class="submit__text">Mutate</span>
                                     </button>
+                                    <button type="button" class="submit" id="errorcheckBtn" onclick="error_check()">
+                                        <span class="submit__text">Compile</span>
+                                    </button>
                                 </div>
-                            </form> 
+                            </form>                               
                         </div>
                     </div>
                 </div>
@@ -120,10 +123,27 @@
     
                 // Add click event listeners to each cell
                 cells.forEach(function(cell) {
-                cell.addEventListener("click", function() {
-                    console.log("Clicked on: " + this.innerText);
-                    jumpToLine(parseInt(this.innerText));
+                    cell.addEventListener("click", function() {
+                        console.log("Clicked on: " + this.innerText);
+                        jumpToLine(parseInt(this.innerText));
+                    });
                 });
+
+                get_killed_list().then(killed_list => {
+
+                    console.log(killed_list);
+
+                    var rows = document.querySelectorAll('#livemutants tbody tr');
+
+                    rows = Array.prototype.slice.call(rows)
+
+                    console.log(rows, rows.length)
+
+                    rows = rows.filter((row) => killed_list.includes(row.children[0].innerText));
+
+                    console.log(rows, rows.length)
+
+                    rows.forEach((row) => row.style.backgroundColor = "lightgreen");
                 });
             </script>
         </div>

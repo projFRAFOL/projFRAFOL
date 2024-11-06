@@ -6,7 +6,7 @@ $(document).ready(function() {
 
         // Show spinner and disable button
         $spinner.removeClass('d-none');
-        $submitButton.prop('disabled', true);
+        //$submitButton.prop('disabled', true);
     });
 });
 
@@ -18,7 +18,7 @@ $(document).ready(function() {
 
         // Show spinner and disable button
         $spinner.removeClass('d-none');
-        $submitButton.prop('disabled', true);
+        //$submitButton.prop('disabled', true);
     });
 });
 
@@ -30,6 +30,6 @@ $(document).ready(function() {
 
         // Show spinner and disable button
         $spinner.removeClass('d-none');
-        $submitButton.prop('disabled', true);
+        //$submitButton.prop('disabled', true);
     });
 });
