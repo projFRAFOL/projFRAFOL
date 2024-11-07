@@ -7,7 +7,7 @@ import re
 import pandas as pd
 import projectmanager as pm
 import jsoneditor as je
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 app.secret_key = "e60OMnoWrQaHjlz"
@@ -263,6 +263,29 @@ def save_testsuite(data):
     file.write(data)
     file.close()
 
+def comment_java_file(file_path, line_number_to_comment):
+    try:
+        # Read the content of the file
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # Check if the specified line number is within the file's length
+        if 1 <= line_number_to_comment <= len(lines):
+            # Comment the specified line if it's not already commented
+            if not lines[line_number_to_comment - 1].strip().startswith("//"):
+                lines[line_number_to_comment - 1] = "// " + lines[line_number_to_comment - 1]
+        
+        # Write the modified content back to the file
+        with open(file_path, 'w') as file:
+            file.writelines(lines)
+        
+        print(f"Line {line_number_to_comment} has been commented.")
+    
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 @app.route('/', methods=['POST', 'GET'])
 def index():
     session["ids"] = pm.get_projects_id()
@@ -303,10 +326,11 @@ def checkout_project():
                       indent=4,
                       separators=(',', ': '))
             
-    add_junit5_to_pom(session["project"] + "f")
+    #add_junit5_to_pom(session["project"] + "f")
 
     return jsonify({'message': 'Project checkout successfully'}), 205
 
+'''
 def add_junit5_to_pom(project):
     print('adding JUnit5 dependency to pom...')
     pompath = "/root/" + project + "/pom.xml"
@@ -332,6 +356,7 @@ def add_junit5_to_pom(project):
         f.close()
     
     return        
+'''
 
 @app.route('/load_project', methods=['post'])
 def load_project():
@@ -363,6 +388,8 @@ def load_project():
     match session["tool"]:
             case "pit":
                 table_header = ["Mutant", "Line", "Operator", "Method"]
+                if project == "Lang-53":
+                    comment_java_file(path, 96)
             case "major":
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
             case _:
