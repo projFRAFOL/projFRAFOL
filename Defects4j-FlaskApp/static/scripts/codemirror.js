@@ -13,7 +13,7 @@ var editor = CodeMirror.fromTextArea(
     }
 );
 
-editor.setSize(null, 500);
+editor.setSize(null, "65vh");
 
 var editor2 = CodeMirror.fromTextArea(
     document.getElementById('dev_suite'),{
@@ -29,7 +29,7 @@ var editor2 = CodeMirror.fromTextArea(
     }
 );
 
-editor2.setSize(null, 500);
+editor2.setSize(null, "65vh");
 
 var editor3 = CodeMirror.fromTextArea(
     document.getElementById('test_class'),{
@@ -60,7 +60,7 @@ var outputTerminal = CodeMirror.fromTextArea(
     }
 );
 
-outputTerminal.setSize(null, 200);
+outputTerminal.setSize(null, "20vh");
 
 fetch('static/projectdata/dev_suite.java')
     .then(response => {

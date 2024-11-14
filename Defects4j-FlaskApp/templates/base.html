@@ -167,6 +167,19 @@
           });    
       }
 
+      function collectRows(allRows) {
+            let rows = document.querySelectorAll('#livemutants tbody tr');
+            allRows.push(...rows);
+
+            let nextButton = document.querySelector('a.page-link.next'); 
+            if (nextButton && !nextButton.classList.contains('disabled')) {
+                nextButton.click();
+                setTimeout(collectRows(allRows), 1000); 
+            } else {
+                console.log('All rows collected:', allRows);
+            }
+      }
+
       function compile() {
           var code = editor.getValue();
           var btn = document.getElementById('generateBtn');
@@ -250,51 +263,6 @@
         });
       }
 
-      function get_versions() {
-        var project = document.getElementById('select_menu_one').value;
-
-        fetch('/project_versions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ project: project })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Get a reference to the select element
-            var selectElement = document.getElementById("version");
-
-            // Clear existing options
-            selectElement.innerHTML = '';
-
-            // Update existing options
-            for (let i = 0;  i < data.versions.length; i++) {
-              var option = document.createElement("option");
-              option.text = data.versions[i];
-              option.value = data.versions[i];
-              selectElement.add(option);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-      }
-
-      function get_killed_list() {
-          return fetch('/killed_list', {
-              method: 'POST'
-          })
-          .then(response => response.json())
-          .then(data => {
-              return data.list;
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              return [];
-          });
-      }
-
       function jumpToLine(lineNumber) {
         var t = editor3.charCoords({ line: lineNumber - 1, ch: 0 }, "local").top;
         var middleHeight = editor3.getScrollerElement().offsetHeight / 2;
@@ -302,7 +270,6 @@
         editor3.setCursor({ line: lineNumber - 1, ch: 0 });
       }
 
-      document.addEventListener("DOMContentLoaded", get_versions());
     </script>
   </body>
 </html>

@@ -101,12 +101,20 @@
                     </thead>
                     <tbody>
                         {% for row in sheet_data %}
-                        <tr>
-                            {% for cell in row %}
-                            <td class="column-clickable"> {{ cell }} </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
+                            {% if row[0] in killed_list %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td class="column-clickable" style="background-color: lightgreen;"> {{ cell }} </td>
+                                    {% endfor %}
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    {% for cell in row %}
+                                    <td class="column-clickable"> {{ cell }} </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endif %}
+                        {% endfor %} 
                     </tbody>
                     <tfoot>
                         <tr>
@@ -127,23 +135,6 @@
                         console.log("Clicked on: " + this.innerText);
                         jumpToLine(parseInt(this.innerText));
                     });
-                });
-
-                get_killed_list().then(killed_list => {
-
-                    console.log(killed_list);
-
-                    var rows = document.querySelectorAll('#livemutants tbody tr');
-
-                    rows = Array.prototype.slice.call(rows)
-
-                    console.log(rows, rows.length)
-
-                    rows = rows.filter((row) => killed_list.includes(row.children[0].innerText));
-
-                    console.log(rows, rows.length)
-
-                    rows.forEach((row) => row.style.backgroundColor = "lightgreen");
                 });
             </script>
         </div>

@@ -135,8 +135,8 @@ def store_csv():
 
     df = pd.read_csv(path)
 
-    if not os.path.exists("/root/" + session["project"] + ".csv"):
-        df.to_csv("/root/" + session["project"] + ".csv", index=False)
+    if not os.path.exists("/root/" + session["project"] + "-" + session["tool"] + ".csv"):
+        df.to_csv("/root/" + session["project"] + "-" + session["tool"] + ".csv", index=False)
 
 def load_csv(project):
     
@@ -288,8 +288,10 @@ def comment_java_file(file_path, line_number_to_comment):
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    session["ids"] = pm.get_projects_id()
+    #session["ids"] = pm.get_projects_id()
+    session["ids"] = ['Cli', 'Gson', 'Lang']
     session["projects"] = pm.get_projects_fromjson()
+    session.modified = True
 
     return render_template('index.html', all_data = [session["ids"], session["projects"]])
 
@@ -459,32 +461,21 @@ def working_project():
 def project_versions():
     data = request.json
 
-    versions = pm.get_project_versions(data['project'])
+    #versions = pm.get_project_versions(data['project'])
+    
+    versions = list()
 
-    print("VERSIONS: \n")
-    print(versions)
+    match str(data['project']):
+        case 'Cli':
+            versions = ['32']
+        case 'Gson':
+            versions = ['15']
+        case 'Lang':
+            versions = ['53']
+        case _:
+                print("No project selection was found.")
 
     return jsonify({'versions': versions}), 200
-
-@app.route('/killed_list', methods=['post'])
-def killed_list():
-
-    df1 = load_csv("results")
-    df2 = load_csv(session["project"])
-
-    mutant_list = list()
-
-    match session["tool"]:
-        case "pit":
-            mutant_list = csv_compare(df2, df1)
-        case "major":
-            mutant_list = csv_compare(df2, df1)
-        case _:
-            print("No tool selection was found.")
-
-    print(mutant_list)
-
-    return jsonify({'list': mutant_list}), 200
 
 @app.route('/analyze', methods=['post'])
 def analyze():
@@ -517,15 +508,18 @@ def analyze():
                 print("No tool selection was found.")
 
     store_csv()
-    df2 = load_csv(session["project"])
+    df1 = load_csv(session["project"] + "-" + session["tool"])
     table_header = list()
+
+    df2 = load_csv("results")
+    killed_list = csv_compare(df1, df2)
 
     match session["tool"]:
             case "pit":
-                sheet_data = pit_parse(df2)
+                sheet_data = pit_parse(df1)
                 table_header = ["Mutant", "Line", "Operator", "Method"]
             case "major":
-                sheet_data = major_parse(df2)
+                sheet_data = major_parse(df1)
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
             case _:
                 print("No tool selection was found.")
@@ -534,7 +528,7 @@ def analyze():
     session.modified = True
 
     return render_template('project.html', all_data = [session["project"], session["tool"]],
-                            table_header = table_header, sheet_data = sheet_data, 
+                            table_header = table_header, sheet_data = sheet_data, killed_list = killed_list,
                             metric_data = session["metric_data"], summary_data = session["summary_data"])
 
 

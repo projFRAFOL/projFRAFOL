@@ -42,8 +42,8 @@
                     <div class="menu_item">
                         <label for="tool">Mutation Tool</label><br>
                         <select name="select_tool" id="tool">
-                            <option value="pit">PIT</option>
                             <option value="major">MAJOR</option>
+                            <option value="pit">PIT</option>
                         </select>
                     </div>
                 </div>
@@ -54,5 +54,63 @@
                 </div>
             </form>
         </div>
+        <div id="warning" hidden>
+            <h5> This project is unavailable for PIT. </h5>
+        </div>
     </div>
+    <script>
+        function checkSelection() {
+            let warning = document.getElementById("warning");
+            let element1 = document.getElementById("select_menu_two");
+            let element2 = document.getElementById("tool");
+            let submitButton = document.getElementById("openBtn");
+            
+            if (element2.value == "pit") {
+                if (element1.value == "Cli-32" || element1.value == "Gson-15" || element1.value == "Lang-53") {
+                    submitButton.disabled = false;
+                    warning.setAttribute("hidden", "hidden");
+                } else {
+                    submitButton.disabled = true;
+                    warning.removeAttribute("hidden");
+                }
+            }
+        }
+
+        function get_versions() {
+        var project = document.getElementById('select_menu_one').value;
+
+        console.log("project: " + project);
+
+        fetch('/project_versions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ project: project })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Get a reference to the select element
+            var selectElement = document.getElementById("version");
+
+            // Clear existing options
+            selectElement.innerHTML = '';
+
+            console.log(data.versions);
+
+            // Update existing options
+            for (let i = 0;  i < data.versions.length; i++) {
+              var option = document.createElement("option");
+              option.text = data.versions[i];
+              option.value = data.versions[i];
+              selectElement.add(option);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+      }
+
+      window.onload = get_versions;
+    </script>
 {% endblock %}
