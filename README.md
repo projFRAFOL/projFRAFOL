@@ -121,7 +121,7 @@ Extract the project into a directory of your choice.
 ### Git Download
 To install Github in your system follow the [link](https://github.com/git-guides/install-git) guidelines.
 
-Clone the project into a directory of your choice using the following command: `git clone https://github.com/PedroTav/Defects4jFlaskApp.git`
+Clone the project into a directory of your choice using the following command: `git clone https://github.com/projFRAFOL/projFRAFOL.git`
 
 ## FRAFOL Docker Compose
 Once Docker has been installed and running, open a terminal in the project directory and run the commmand:
