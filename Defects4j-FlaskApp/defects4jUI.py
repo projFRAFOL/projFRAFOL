@@ -7,6 +7,7 @@ import re
 import pandas as pd
 import projectmanager as pm
 import jsoneditor as je
+import ast
 #from bs4 import BeautifulSoup
 
 app = Flask(__name__)
@@ -34,49 +35,17 @@ def load_editor():
 def major_parse(df):
     mutant_list = df["Mutant"].tolist()
 
-    path = '/root/' + session["project"] + 'f/tools_output/major/'
-    filetype = "*.csv"
-    filename = ""
-    for file_path in os.listdir(path):
-        if file_path.endswith(filetype[1:]):
-            filename = file_path
-
-    path_csv = path + '/' + filename
-
-    kill_csv = pd.read_csv(path_csv)
-
-    mutant_nr = kill_csv["MutantNo"].tolist()
-    live_mutant = kill_csv["[FAIL | TIME | EXC | LIVE]"].tolist()
-
-    live_mutant_ids = list()
-
-    for item1, item2 in zip(mutant_nr, live_mutant):
-        if item2 == 'LIVE':
-            live_mutant_ids.append(item1)
-
-    filetype = "*.log"
-    filename = ""
-    for file_path in os.listdir(path):
-        if file_path.endswith(filetype[1:]):
-            filename = file_path
-
-    path_log = path + '/' + filename
-
-    with open(path_log) as f:
-        f = f.readlines()
-
     line_list = list()
     operator_list = list()
     original_list = list()
     mutated_list = list()
 
-    for line in f:
-        attributes = re.split(":", line)
-        if int(attributes[0]) in live_mutant_ids:
-            line_list.append(attributes[5])
-            operator_list.append(attributes[1])
-            original_list.append(attributes[2])
-            mutated_list.append(attributes[3])
+    for _, row in df.iloc[1:].iterrows():
+        details = ast.literal_eval(row['Details'])
+        line_list.append(details.get('line'))
+        operator_list.append(details.get('operator'))
+        original_list.append(details.get('original'))
+        mutated_list.append(details.get('mutated'))
 
     sheet_data = list()
 
@@ -89,28 +58,18 @@ def major_parse(df):
 def pit_parse(df):
     mutant_list = df["Mutant"].tolist()
 
-    json_list = df.iloc[:, 1].tolist()
-
     line_list = list()
-
-    for i, j in enumerate(json_list):
-        j = j.replace("\'", "\"")
-        content = json.loads(j)
-        line_list.insert(i, content["line"])
-
     operator_list = list()
-
-    for i, j in enumerate(json_list):
-        j = j.replace("\'", "\"")
-        content = json.loads(j)
-        operator_list.insert(i, content["mutator"][47:])
-
     method_list = list()
 
-    for i, j in enumerate(json_list):
-        j = j.replace("\'", "\"")
-        content = json.loads(j)
-        method_list.insert(i, content["mutated_method"])
+    for _, row in df.iloc[1:].iterrows():
+        details = ast.literal_eval(row['Details'])
+        line_list.append(details.get('line'))
+        mutator = details.get('mutator')
+        if mutator:
+            trimmed_mutator = mutator.replace('org.pitest.mutationtest.engine.gregor.mutators.', '')
+        operator_list.append(trimmed_mutator)
+        method_list.append(details.get('mutated_method'))
 
     sheet_data = list()
 
@@ -142,7 +101,7 @@ def load_csv(project):
     
     path = "/root/" + project + ".csv"
 
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, header=None, names=["Mutant", "Details"])
 
     return df
 
@@ -332,34 +291,6 @@ def checkout_project():
 
     return jsonify({'message': 'Project checkout successfully'}), 205
 
-'''
-def add_junit5_to_pom(project):
-    print('adding JUnit5 dependency to pom...')
-    pompath = "/root/" + project + "/pom.xml"
-
-    data = None
-    with open(pompath, "r") as f:
-        data = f.read()
-
-        new_dependency = """<dependency>
-            <groupId>org.junit</groupId>
-            <artifactId>junit-bom</artifactId>
-            <version>5.11.3</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>"""
-
-        data.replace("<dependencies>", "<dependencies>\n" + new_dependency)
-
-    os.remove(pompath)
-
-    with open(pompath, "w") as f:
-        f.write(data)
-        f.close()
-    
-    return        
-'''
-
 @app.route('/load_project', methods=['post'])
 def load_project():
     data = request.json
@@ -511,9 +442,6 @@ def analyze():
     df1 = load_csv(session["project"] + "-" + session["tool"])
     table_header = list()
 
-    df2 = load_csv("results")
-    killed_list = csv_compare(df1, df2)
-
     match session["tool"]:
             case "pit":
                 sheet_data = pit_parse(df1)
@@ -523,6 +451,9 @@ def analyze():
                 table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
             case _:
                 print("No tool selection was found.")
+
+    df2 = load_csv("results")
+    killed_list = csv_compare(df1, df2)
         
     session["summary_data"] = summary()
     session.modified = True
