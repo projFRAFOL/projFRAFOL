@@ -206,7 +206,10 @@ def summary():
     # Convert matches to a dictionary
     data = {key.strip(): value.strip() for key, value in matches}
 
-    values = [data["Total mutants count"], data["Killed mutants count"], data["Live mutants count"], round(float(data["Mutation score"])*100,2)]
+    killed_mutants = int(session["totalmutants"]) - int(data["Live mutants count"])
+    mutation_score = round(float(killed_mutants/int(session["totalmutants"]))*100,2)
+
+    values = [session["totalmutants"], killed_mutants, data["Live mutants count"], mutation_score]
 
     return values
 
@@ -244,6 +247,12 @@ def comment_java_file(file_path, line_number_to_comment):
         print(f"File '{file_path}' not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+def clear_table_cache(file):
+    path = "/root/" + file + ".csv"
+
+    if os.path.exists(path):
+        os.remove(path)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -319,16 +328,48 @@ def load_project():
     file.close()
 
     match session["tool"]:
+        case "pit":
+            table_header = ["Mutant", "Line", "Operator", "Method"]
+            if project == "Lang-53":
+                comment_java_file(path, 96)
+        case "major":
+            table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
+        case _:
+            print("No tool selection was found.")
+
+
+    session["metric_data"] = coverage()
+
+    path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/analyzer.py'
+    cmd = ("python3 " + path + " run $HOME/" + session["project"] + "f --tools " + session["tool"])
+    os.system(cmd)
+    path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/reportsanalyzer.py'
+
+    match session["tool"]:
             case "pit":
-                table_header = ["Mutant", "Line", "Operator", "Method"]
-                if project == "Lang-53":
-                    comment_java_file(path, 96)
+                dir_path = "/root/" + session["project"] + "f/tools_output/pit/"
+                filetype = "*.xml"
+                filename = ""
+                for file_path in os.listdir(dir_path):
+                    if file_path.endswith(filetype[1:]):
+                        filename = file_path
+                cmd = ("python3 " + path + " table -p " + session["project_name"] + " -b "
+                           + session["project_version"] + " -t " + session["tool"]
+                           + " $HOME/" + session["project"] + "f/tools_output/pit/" + filename
+                           + " -o " + "$HOME/results.csv")
+                os.system(cmd)
             case "major":
-                table_header = ["Mutant", "Line", "Operator", "Original", "Mutated"]
+                cmd = ("python3 " + path + " table -p " + session["project_name"] + " -b "
+                           + session["project_version"] + " -t " + session["tool"]
+                           + " $HOME/" + session["project"] + "f/tools_output/major/ -o "
+                           + "$HOME/results.csv")
+                os.system(cmd)
             case _:
                 print("No tool selection was found.")
 
-    session["metric_data"] = coverage()
+    df = load_csv("results")
+    session["totalmutants"] = len(df)-1
+
     session.modified = True
 
     load_editor()
@@ -352,6 +393,9 @@ def generate():
 
     if data['devTests']:
         dev_tests = " --all-dev"
+
+    if data['clearCache']:
+        clear_table_cache(session["project"] + "-" + session["tool"])
 
     path = os.path.split(os.getcwd())[0] + 'defects4j/analyzer/analyzer.py'
     cmd = ("python3 " + path + " run $HOME/" + session["project"] + "f"+ dev_tests + student_tests + " --tools " + session["tool"])
